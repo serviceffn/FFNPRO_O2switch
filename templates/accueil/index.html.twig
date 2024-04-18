@@ -1,0 +1,44 @@
+ {% extends 'base.html.twig' %}   
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %}
+
+    {# TOP #}
+    {% if app.user.roles == ["ROLE_USER"] %}
+          {# <h1 style='text-align:center'>FFNPRO EN MAINTENANCE JUSQU'A 17H, MERCI DE VOTRE PATIENCE. </h1>  #}
+         <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Accueil</h1> 
+         <p style='text-align:center'>{{ app.user.nom }}</p>
+        <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+        <h2 style='text-align:center'>La FFN vous souhaite une agréable journée sur FFNPRO ...</h2>
+        <div class="container" style='margin-top:3%'>
+    <div class="content" style='margin:0 auto;height: 300px;width: 500px;background: #FFFFFF;overflow: hidden;border-radius: 20px;cursor: pointer;box-shadow: 0 0 20px 8px #283461;'>
+    {% for image in association.images %}
+            <div style='text-align:center;margin-top:8%'>
+                <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="150" height="100">
+            </div>
+    {% endfor %}
+    <p style='text-align:center;margin-top:8%'><b>{{app.user.nom}}</b></p>
+    <p style='text-align:center;margin:3%'>{{app.user.adresse}}</p>
+    <p style='text-align:center;margin:3%'>{{app.user.zip}} {{app.user.ville}}</p>
+    </div>
+
+    {% if app.user.id != 94 %}
+    <p style='text-align:center;margin:3%; font-weight:bold; font-size:22px;'>Votre numéro d'affiliation : {{ app.user.affiliationNumber }}</p>
+    {% endif %}
+
+
+    {% if app.user.id == 94 %}
+        <p style='text-align:center;margin-top:5%'><b>En quelques chiffres... {{app.user.nom}}</b> a réuni plus de <b>{{usersYear}}</b> licencié(e)s sur l'année {{ "now"|date("Y") }} </p>
+    {% else %}
+         <p style='text-align:center;margin-top:5%'><b>En quelques chiffres... {{app.user.nom}}</b> a réuni plus de <b>{{allAssoc}}</b> licencié(e)s sur l'année {{ "now"|date("Y") }} </p> 
+         <p style='text-align:center;margin-top:5%'><b>11/04/2023 : Il n'est plus possible de supprimer des licenciés.</b></p> 
+
+    {% endif %}
+    {% else %}  
+        <p style='font-size: 10em;text-align:center'>❌</p>
+        <p style='text-align:center'>{% if app.user.type == 'Centre' %}Le{% else %}L'{% endif %} {{app.user.type}} est désactivé(e) de FFNPRO<br>Veuillez contacter le secréteriat de la FFN pour réactivation.</p>
+    {% endif %} 
+
+
+{% endblock %}

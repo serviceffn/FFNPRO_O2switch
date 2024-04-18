@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Dirigeants{% endblock %}
+
+{% block body %}
+    <h1>Create new Dirigeants</h1>
+
+    {{ include('dirigeants/_form.html.twig') }}
+
+    <a href="{{ path('dirigeants_index') }}">back to list</a>
+{% endblock %}

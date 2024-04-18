@@ -1,0 +1,9 @@
+index:
+    path: /
+    controller: App\Controller\SecurityController::index
+  
+# users_show_qrcode:
+#     path: /qrcode/{id}
+#     controller: App\Controller\UsersController::showQrCode
+
+

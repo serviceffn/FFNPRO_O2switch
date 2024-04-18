@@ -1,0 +1,72 @@
+{# {% extends 'base.html.twig' %} #}
+
+{# {% block title %}Licencié(e)s{% endblock %} #}
+{% block stylesheets %}
+    <style>
+        .container {
+  display: flex;
+  flex-direction: row;
+  align-items: top;
+  justify-content: left;
+  margin-top:10%
+  
+}
+
+.text-container {
+    margin-bottom: 30px;
+  }
+
+img {
+  width: 150px;
+  height: 180px;
+  margin: 0 20px;
+}
+
+p {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 20px;
+}
+
+hr {
+  border-top: 1px solid black;
+  width: 50%;
+  margin: 5px auto;
+}
+
+.infos{
+    margin-right:35%
+}
+    </style>
+{% endblock %}
+{% block body %}
+    {# TOP #}
+
+
+     <div style='width:90%;border-radius:20px;border:1px solid black;box-shadow: 5px 10px 18px #888888;padding:5%' >
+
+  <div class="infos" style='' width="100%">
+  {% for users in user %}
+    {% set licenceCut = users.n_licence|slice(0, 4) %}
+    <p style="width:100%"><img src="{{ asset('/uploads/' ~ users.name) }}" alt="Image" height='10%' style='float:right;' >{% if users.created_at|date('Y') == date or users.renouvellement_at|date('Y') == date  %}
+            <p style='color:green;'> ✔️ <b>Licence Valide <b>{{ "now"|date("Y") }}</b>
+</b> ✔️</p>
+        {% else %}
+            <p style='color:red;'>❌ <b>Licence Non Valable (Licence expirée) <b>{{ "now"|date("Y") }}</b>
+</b> ❌</p>
+        {% endif %} <br>{{ users.nom }} {{users.prenom}}<br>{{users.n_licence}}<br>{{ users.nomm}}<br>{{users.adresseassoc}}<br>{{users.villeassoc}} {{users.zipassoc}}<br>{{users.emailassoc}} </p>
+   {% endfor %}
+   
+  </div>
+  <div class="container">
+  <img src="{{ asset('/uploads/ffn.jpg') }}" alt="Image 2">
+    <div class="text-container" style='width:35%'>
+      <p>26 rue Paul Belmondo<br>75012 Paris - 01.48.10.31.00<br>contact@ffn-naturisme.com</p><br>
+      <div style="border-bottom: 1px solid black;margin-top:3%"></div><br>
+      <p>Assurance MAIF4274207D<br></p>
+    </div>
+    <img src={{ asset('/uploads/inf.gif') }} alt="Image 2" style='width:15%;height:15%'> 
+    <img src={{ qrcode }} alt="Image 2"> 
+    {# {{ qrcode_url }} #}
+ </div>
+{% endblock %} 

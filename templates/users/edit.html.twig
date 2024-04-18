@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Users{% endblock %}
+
+{% block body %}
+
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+
+    {{ form_start(form) }}
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Identité</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div>
+            <p style='margin-bottom:0%;text-align:center'>Nom : </p>{{ form_widget(form.nom, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Prenom : </p>{{ form_widget(form.prenom, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Centre émetteur  : </p>{{ form_widget(form.centre_emetteur, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='position:absolute;visibility:hidden'>Centre émetteur  :    {{ form_widget(form.centre_emetteur, { 'attr': {'style': 'visibility:hidden'} }) }}  </p>
+            <p style='margin-bottom:0%;text-align:center'>Région  : </p>{{ form_widget(form.region,{ 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Genre : </p>{{ form_widget(form.genre, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Date de naissance : </p>{{ form_widget(form.anniversaire, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        </div>
+
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Localisation</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div>
+            <p style='margin-bottom:0%;text-align:center'>Adresse : </p>{{ form_widget(form.adresse, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Complément : </p>{{ form_widget(form.complement, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Ville : </p>{{ form_widget(form.ville, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Code Postal  : </p>{{ form_widget(form.zip, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Pays : </p>{{ form_widget(form.pays, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        </div>
+
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Contact</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div>
+            <p style='margin-bottom:0%;text-align:center'>Téléphone : </p>{{ form_widget(form.telephone, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            <p style='margin-bottom:0%;text-align:center'>Email : </p>{{ form_widget(form.email, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+            {# <p style="margin-bottom:0%;text-align:center">Impression licence : </p>{{ form_widget(form.is_imprimed, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }} #}
+            <p style="margin-bottom:0%;text-align:center">L'adhérent(e) accepte d'être contacté par la FFN : </p>{{ form_widget(form.agree_terms, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }} <br>       </div>
+            {# <p style='position:absolute;visibility:hidden'>{{ form_widget(form.impression, { 'attr': {'style': 'visibility:hidden'} }) }}  </p>  #}
+            {% if  app.user.id == 94 %}
+            <p style='text-align:center'><b><a href="{{ path('choice_edit', {'id': app.request.get('id')}) }}" style='position: relative;top: 190%;transform: translate(-50%, -50%);'> > Modification Impression ou QRCode < </a></b></p><br>
+            {% endif %}
+        <div style="text-align:center;">
+            <button class="btn btn-success" style='margin-top:3%;width:15%;display:block;margin:1% auto !important;margin-top:5%'>{{ button_label|default('Valider les modifications') }}</button>
+            <a href="{{ path('accueil') }}" class='btn btn-danger' style='margin-top:3%;width:15%;display:block;margin: 1% auto !important;'>Annuler les modifications</a>
+        </div>
+
+    {{ form_end(form) }}
+    
+
+
+    {# {{ include('users/_delete_form.html.twig') }} #}
+{% endblock %}

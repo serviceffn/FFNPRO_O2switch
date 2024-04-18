@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dirigeants index{% endblock %}
+
+{% block body %}
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Dirigeants</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    <div class="text-center" style="margin-top: 20px;">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher..." style="width: 50%; display: inline-block;">
+    </div>
+
+    <table class="table table-striped" style="margin-top:5%;margin-left:10%;width:82%">
+        <thead>
+            <tr>
+                <th>Centre Emetteur</th>
+                <th>Président(e)</th>
+                <th>Vice_président(e)</th>
+                <th>Trésorier(e)</th>
+                <th>Secrétaire Général</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for dirigeant in dirigeants %}
+            <tr>
+                <td>{{ dirigeant.nom }}</td>
+                <td>{{ dirigeant.dirigeantPresident }}</td>
+                <td>{{ dirigeant.dirigeantVicePresident }}</td>
+                <td>{{ dirigeant.dirigeantTresorier }}</td>
+                <td>{{ dirigeant.dirigeantSecretaire }}</td>
+                <td>
+                    <a href="{{ path('dirigeant_edit', {'id': dirigeant.id}) }}">Modifier</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const tableRows = document.querySelectorAll('.table tbody tr');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+
+                tableRows.forEach(function(row) {
+                    const rowData = row.textContent.toLowerCase();
+                    const regex = new RegExp(searchTerm.split('').join('.*?'), 'g');
+
+                    row.style.display = rowData.match(regex) ? '' : 'none';
+                });
+            });
+        });
+    </script>
+{% endblock %}

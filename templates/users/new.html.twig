@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un(e) licencié(e)
+{% endblock %}
+
+{% block body %}
+
+	<h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+	<p style='text-align:center'>{{ app.user.nom }}</p>
+	<hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+
+	{{ form_start(form) }}
+
+	<div style='margin: 0 auto;display:block'>
+		<h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Identité</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+
+
+		{% if errorMessage is defined %}
+			<div style="position: fixed; top: 50px; left: 10px; padding: 10px; background-color: #ff0000; color: #ffffff; border-radius: 5px;">
+				{{ errorMessage }}
+			</div>
+		{% endif %}
+
+
+		<p style="margin-bottom:0%;text-align:center">Nom :</p>
+		{{ form_widget(form.nom,{ 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		{{ form_errors(form.nom) }}
+		<p style="margin-bottom:0%;text-align:center">Prénom :{{ form_widget(form.prenom, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}</p>
+		{{ form_errors(form.prenom) }}
+		<p style="margin-bottom:0%;text-align:center">Genre :
+		</p>
+		{{ form_widget(form.genre, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Région :
+		</p>
+		{{ form_widget(form.region, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Date de Naissance :
+		</p>
+		{{ form_widget(form.anniversaire, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style='position:absolute;visibility:hidden;'>Centre Emetteur:
+		</p>
+		{{ form_widget(form.centre_emetteur, { 'attr': {'style': "width:20%;height:1.7em;margin-left:25%;visibility:hidden;'"} }) }}
+
+	</div>
+
+	<h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Localisation</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+	<div>
+		<p style="margin-bottom:0%;text-align:center">Adresse :
+		</p>
+		{{ form_widget(form.adresse, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Complément :
+		</p>
+		{{ form_widget(form.complement, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Ville :
+		</p>
+		{{ form_widget(form.ville, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Code Postal  :
+		</p>
+		{{ form_widget(form.zip, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Pays :
+		</p>
+		{{ form_widget(form.pays, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+	</div>
+
+	<h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Contact</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+	<div>
+		<p style='margin-bottom:0%;text-align:center'>Téléphone :
+		</p>
+		{{ form_widget(form.telephone, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style='margin-bottom:0%;text-align:center'>Email :
+		</p>
+		{{ form_widget(form.email, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">Impression licence :
+		</p>
+		{{ form_widget(form.impression, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+		<p style="margin-bottom:0%;text-align:center">L'adhérent(e) accepte d'être contacté par la FFN :
+		</p>
+		{{ form_widget(form.agree_terms, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+	</div>
+	<button class="btn btn-success" style='margin-top:6%;width:25%;display:block;margin:auto !important;'>{{ button_label|default('Ajouter le/la licencié(e)') }}</button>
+	{{ form_end(form) }}
+
+{% endblock %}

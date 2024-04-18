@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Centres{% endblock %}
+
+{% block body %}
+
+    {% if app.user.id == 94 %}
+        {# TOP #}
+        <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Centres</h1>
+        <p style='text-align:center'>{{ app.user.nom }}</p>
+        <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+        
+         <p style='text-align:center;font-weight:italic;'>Il y a <b>{{countInactif}}</b> Associations / Centres qui n'ont pas commandés de licences cette année, Découvrez lesquelles <a href="{{ path('associations_inactif') }}"  style='text-color:blue;font-weight:bold;'> ici</a> </p> 
+        {# DIV ADD LICENCIE #}
+        <div style='border:2px solid #818181;border-radius:2%;width :40%; height:12em; text-align:center;margin-left:10%;background-color:#F5F5F5;float:left'>
+            <p style='margin-top:6%'>Ajouter un centre</p>
+            <a href="{{ path('associations_new') }}" class='btn btn-success' style=''>Ajouter un centre</a> 
+        </div>
+    
+        {# DIV ADD EXPORT #}
+        <div style='border:2px solid #818181;border-radius:2%;width :40%; height:12em; text-align:center;margin-left:52%;background-color:#F5F5F5;'>
+            <p style='margin-top:6%'>Export des centres</p>
+            <a href="{{ path('csv_associations') }}" class='btn btn-primary' style='margin-right:10%;margin-left:10%'>Export CSV</a> 
+        </div>
+        
+        <div style='border:2px solid #818181;border-radius:2%;width :40%; height:12em; text-align:center;margin-left:10%;background-color:#F5F5F5;float:left;margin-top:2%'>
+            <div style='margin-right:9%;margin-left:9%;margin-top:4%'>      
+                {{ form(filtre) }}
+            </div>
+        </div>
+    
+        {# <a href="{{ path('app_register') }}">Licence comptoir</a> / <a href=''>Licence internet</a>
+        <h2>Renouveller une licence</h2>  #}
+        <div style='border:2px solid #818181;border-radius:2%;width :40%; height:12em; text-align:center;margin-left:52%;background-color:#F5F5F5;margin-top:2%'>
+            <p style='margin-top:4%'>Recherche</p>
+            {{ form_start(form) }}
+                <p style='position:absolute;margin-left:3%'></p>{{ form_widget(form.mots, { 'attr': {'style': "width:50%;margin:auto;margin-bottom:3%"} }) }}
+            {{ form_end(form)}}
+        </div>
+        
+                        
+    
+        <table class="table table-striped" style="margin-top:5%;margin-left:10%;width:82%">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Initiale</th>
+                    <th>Type</th>
+                    <th>Identifiant</th>
+                    <th>Président(e)</th>
+                    <th>Actif ?</th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for association in associationsPage %}
+                <tr>
+                    <td>{{ association.nom }}</td>
+                    <td>{{ association.initiale }}</td>
+                    <td>{{ association.type }}</td>
+                    <td>{{ association.email }}</td>
+                    <td>{{ association.nomPresidebt}} {{ association.prenomPresident }}</td>
+                    {% if association.isActive == 1 %}
+                        <td>✔️</td>
+                    {% else %}
+                        <td>❌</td>
+                    {% endif %}
+                    <td>
+                        <a href="{{ path('associations_show', {'id': association.id}) }}">Voir | </a>
+                        <a href="{{ path('associations_edit', {'id': association.id}) }}">Modifier</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="16">no records found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div style='margin-left:49%'>
+            {{ knp_pagination_render(associationsPage) }}
+        </div>
+    {% else %}
+        <p>Accès refusé</p>
+    {% endif %}
+
+{% endblock %}
+
+

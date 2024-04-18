@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %}
+
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Centres</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+
+    {{ form_start(form) }}
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Identité</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        {% for image in association.images %}
+            <div style='margin-left:46.5%'>
+                <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="80" height="80">
+                <a href="{{ path('associations_delete_image', {id: image.id}) }}" data-delete data-token="{{ csrf_token('delete' ~ image.id) }}">Supprimer</a>
+            </div>
+        {% endfor %}<br>
+        <div style='margin-left:35%;margin-right:36%'>
+            <p style='font-size:0.8em'>Format autorisé : PNG, JPEG.</p>
+            <p style='font-size:0.8em'>Format non autorisé : Gif, Pdf.</p>
+            <label for="{{ form.images.vars.id }}">Choisir une image :</label>
+            <p style='float:left;'>{{ form_widget(form.images)}}</p>
+        </div>
+
+    <!-- Nouvelle section pour la prévisualisation de l'image -->
+    <div id="image-preview-container" style='margin-left:35%;margin-top:20px;'>
+        {% if form.images.vars.data is defined and form.images.vars.data is not null %}
+        
+            <img id="image-preview" src="{{ asset('/uploads/' ~ form.images.vars.data.name) }}" alt="Image Preview" width="100" height="100">
+        {% else %}
+            {% if association.images is empty %}
+                {# <img id="image-preview" src="{{ path_vers_image_par_defaut }}" alt="Image par défaut" width="100" height="100"> #}
+            {% else %}
+                <img id="image-preview" src="" alt="Image Preview" width="100" height="100">
+            {% endif %}
+        {% endif %}
+        <div id="upload-success-message" style="margin-left:35%; color: green;"></div>
+    </div>
+
+</div>
+
+
+
+        <div style='margin-left:35%;'>
+            <p style='position:absolute;visibility:hidden;'>Type : </p>{{ form_widget(form.type, { 'attr': {'style': "width:25%;height:2em;margin-left:25%;visibility:hidden"} }) }}
+            {# <p style='position:absolute;visibility:hidden;'>Email de connexion: </p>{{ form_widget(form.email, { 'attr': {'style': "width:25%;height:2em;margin-left:25%;"} }) }} #}
+            {# <p style='position:absolute;'>Password : </p>{{ form_widget(form.password, { 'attr': {'style': "width:20%;height:2em;margin-left:25%"} }) }} #}
+            <p style='position:absolute;'>Téléphone : </p>{{ form_widget(form.telephone_assoc, { 'attr': {'style': "width:25%;height:2em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Email à mettre sur licence: </p>{{ form_widget(form.email_assoc, { 'attr': {'style': "width:25%;height:2em;margin-left:25%"} }) }}
+            <p style='position:absolute;visibility:hidden;'></p>{{ form_widget(form.initiale, { 'attr': {'style': "width:25%;height:2em;margin-left:25%;visibility:hidden;"} }) }}
+            <p style='position:absolute;visibility:hidden;'>Email de connexion: </p>{{ form_widget(form.email, { 'attr': {'style': "width:25%;height:2em;margin-left:25%;visibility:hidden"} }) }}
+            <p style='position:absolute;visibility:hidden;'>Nom du centre : </p>{{ form_widget(form.nom, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%;visibility:hidden;"} }) }} 
+        </div>
+
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Localisation</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div style='margin-left:35%'>
+            <p style='float:left;'>Adresse : </p>{{ form_widget(form.adresse, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Ville : </p>{{ form_widget(form.ville, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Code Postal  : </p>{{ form_widget(form.zip, { 'attr': {'style': "width:25%;height:2em;margin-left:25%"} }) }} 
+            <p style='position:absolute;'>Région : </p>{{ form_widget(form.region, { 'attr': {'style': "width:25%;height:2em;margin-left:25%"} }) }} 
+            <p style='position:absolute;'>Pays : </p>{{ form_widget(form.pays, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+        </div>
+
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Président(e)</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div style='margin-left:35%'>
+            <p style='float:left;'>Prénom : </p>{{ form_widget(form.prenom_president, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Nom : </p>{{ form_widget(form.nom_presidebt, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Téléphone : </p>{{ form_widget(form.telephone_president, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Email : </p>{{ form_widget(form.email_president, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+        </div>
+        <button class="btn btn-success" style='float:left;margin-left:30%;margin-top:5%'>{{ button_label|default('Valider les modifications') }}</button>
+        {{ form_end(form) }}
+    <a href="{{ path('accueil') }}" class='btn btn-danger' style='margin-left:3%;margin-top:5%;'>Annuler les modifications</a>
+
+
+    {# {{ include('users/_delete_form.html.twig') }} #}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('Js/images.js') }}"></script> 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.querySelector('#{{ form.images.vars.id }}');
+            const imagePreview = document.querySelector('#image-preview');
+              const successMessage = document.createElement('div');
+            successMessage.id = 'upload-success-message';
+            successMessage.style.marginTop = '15px';
+            successMessage.style.color = 'black';
+            successMessage.style.fontWeight = 'bold';
+            
+            document.getElementById('image-preview-container').appendChild(successMessage);
+
+
+            imageInput.addEventListener('input', function() {
+                const file = this.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.addEventListener('load', function() {
+                        imagePreview.setAttribute('src', reader.result);
+                        successMessage.innerHTML = 'L\'image a été chargée avec succès. Cliquez sur supprimer à coté de votre ancien logo et valider les modifications.';
+
+                    });
+
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.setAttribute('src', '');
+                    successMessage.innerHTML = '';
+
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+
+

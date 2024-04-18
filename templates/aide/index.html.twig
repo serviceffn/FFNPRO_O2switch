@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %}
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Centre d'aide</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    {% if app.request.attributes.get('_route') == 'help_index'%}
+        <video controls width="70%" style='margin-left:10%'>
+        <source src="{{ asset('/videos/notice.mp4') }}"
+                type="video/mp4">
+                Sorry, your browser doesn't support embedded videos.
+        </video>
+    <div style='margin-right:20%;margin-left:20%;margin-top:10%'>
+        <h2 style='text-align:center;margin:0'>Contact</h2><br>
+        <p style='text-align:center;margin:0'>Vous pouvez choisir le destinataire. Voici dans quel cas les contactés :</p><br>
+        <p style='text-align:center;margin:0'><b>Secrétariat</b> : Une licence non arrivée ? Un problème administratif ? Changement de club pour les licenciés...</p><br>
+        <p style='text-align:center;margin:0'><b>Service Informatique</b> : Un problème sur FFNPRO? Une question technique ? Un bug sur FFNPRO ? </p><br>
+    {{ form_start(form) }}
+                <p>Destinataire : </p>{{ form_widget(form.destinataire, { 'attr': {'style': ""} }) }}
+                <p style='visibility:hidden;position:absolute;'>{{ form_widget(form.envoyeur, { 'attr': {'style': "width:25%;height:2em;margin-left:25%;visibility:hidden", 'value': app.user.nom} }) }}</p>
+    {{ form_end(form) }}
+    </div>
+    {% endif %}
+    {% if app.user.id != 94 and app.request.attributes.get('_route') == 'statistiques_index'%}
+  
+    {% endif %}
+        
+        
+{% endblock %}

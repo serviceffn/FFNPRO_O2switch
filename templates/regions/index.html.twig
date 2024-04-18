@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Regions{% endblock %}
+
+{% block body %} 
+
+    {# <a href="{{ path('app_register') }}">Licence comptoir</a> / <a href=''>Licence internet</a>
+    <h2>Renouveller une licence</h2>  #}
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Régions</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    {# DIV ADD EXPORT #}
+    <div style='border:2px solid #818181;border-radius:2%;width :40%; height:7em; text-align:center;margin-left:30%;background-color:#F5F5F5;margin-top:2%'>
+        <p style='margin-top:3%'>Export des régions</p>
+        <a href="{{ path('csvv_region') }}" class='btn btn-primary' style='margin-right:10%;margin-left:10%'>Export CSV</a> 
+    </div>
+
+
+    <table class="table table-striped" style="margin-top:5%;margin-left:10%;width:82%">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Région</th>
+                <th>Président(e)</th>
+                {# <th>Email_president</th> #}
+                {# <th>Telephone_president</th> #}
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for region in regions %}
+            <tr>
+                <td>{{ region.id }}</td>
+                <td>{{ region.nom }}</td>
+                <td>{{ region.nomPresident }} {{ region.prenomPresident }}</td>
+                {# <td>{{ region.emailPresident }}</td> #}
+                {# <td>{{ region.telephonePresident }}</td> #}
+                <td>
+                    <a href="{{ path('regions_show', {'id': region.id}) }}">Voir | </a>
+                    <a href="{{ path('regions_edit', {'id': region.id}) }}">Changer de président |</a>
+                    <a href="{{ path('statistiques_regions', {'id': region.id}) }}">Statistiques</a>
+                </td> 
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

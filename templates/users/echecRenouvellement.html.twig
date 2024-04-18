@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %} 
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    <p style='font-size: 10em;text-align:center'>❌</p>
+    <p style='text-align:center'>Le licencié <b>{{user.nom}} {{user.prenom}}</b> a éssayé de renouveler sa licence.<br>Son numéro de licence est : <b>{{user.nLicence}}</b></p>
+    <p style='text-align:center'>La FFN ne vous a pas facturée car le/la licencié(e) possède déjà une licence pour l'année en cours.</p>
+    <div style="text-align:center;">
+        <a href="{{ path('accueil') }}" class="btn btn-primary" style="margin: 10px auto;">Retour au menu principal</a>
+    </div>
+{% endblock %}

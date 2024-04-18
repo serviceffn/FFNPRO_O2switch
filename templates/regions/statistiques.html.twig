@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO
+{% endblock %}
+
+{% block body %}
+
+	{# TOP #}
+	{% if app.user.roles == ["ROLE_USER"] %}
+		{# <h1 style='text-align:center'>FFNPRO EN MAINTENANCE JUSQU'A 17H, MERCI DE VOTRE PATIENCE. </h1> #}
+		<h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Accueil</h1>
+		<p style='text-align:center'>{{ app.user.nom }}</p>
+		<hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+		<p style='font-style:italic;text-align:center;'>Chiffres donnés à titre approximatif, les régions n'ont commencé qu'à partir de 2022.</p>
+
+		<table class="table table-striped" style="margin-top:5%;margin-left:10%;width:82%">
+			<thead>
+				<tr>
+					<th>Nom</th>
+					<th>Initiale</th>
+					<th>Type</th>
+					<th>Identifiant</th>
+					<th>Président(e)</th>
+					<th>Actif</th>
+					<th>actions</th>
+				</tr>
+			</thead>
+			{% if regions.id == 1 %}
+				<img src="{{ asset('/regions-uploads/1.png') }}" alt="Image" width="150" height="100" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 2 %}
+				<img src="{{ asset('/regions-uploads/2.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 3 %}
+				<img src="{{ asset('/regions-uploads/3.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 4 %}
+				<img src="{{ asset('/regions-uploads/4.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 5 %}
+				<img src="{{ asset('/regions-uploads/5.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 6 %}
+				<img src="{{ asset('/regions-uploads/6.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 7 %}
+				<img src="{{ asset('/regions-uploads/7.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 8 %}
+				<img src="{{ asset('/regions-uploads/8.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 9 %}
+				<img src="{{ asset('/regions-uploads/9.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 10 %}
+				<img src="{{ asset('/regions-uploads/10.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 11 %}
+				<img src="{{ asset('/regions-uploads/11.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 12 %}
+				<img src="{{ asset('/regions-uploads/12.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 13 %}
+				<img src="{{ asset('/regions-uploads/13.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 14 %}
+				<img src="{{ asset('/regions-uploads/14.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 15 %}
+				<img src="{{ asset('/regions-uploads/15.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+			{% if regions.id == 16 %}
+				<img src="{{ asset('/regions-uploads/16.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+			{% endif %}
+
+			{% for association in AssociationsPages %}
+				<tr>
+					<td>{{ association.nom }}</td>
+					<td>{{ association.initiale }}</td>
+					<td>{{ association.type }}</td>
+					<td>{{ association.email }}</td>
+					<td>{{ association.nomPresidebt}}
+						{{ association.prenomPresident }}</td>
+					{% if association.isActive == 1 %}
+						<td>✔️</td>
+					{% else %}
+						<td>❌</td>
+					{% endif %}
+					<td>
+						<a href="{{ path('associations_show', {'id': association.id}) }}">Voir |
+						</a>
+						<a href="{{ path('associations_edit', {'id': association.id}) }}">Modifier</a>
+					</td>
+				</tr>
+			{% endfor %}
+
+			<p style='text-align:center;margin-top:5%'>
+				<b>En quelques chiffres...
+					{{regions.nom}}</b>
+				a réuni plus de
+				<b>{{countAllRegionsYear}}</b>
+				licencié(e)s sur l'année
+				{{ "now"|date("Y") }}
+				dont
+				<b>{{countAllRegionsHommesYear}}</b>
+				hommes et
+				<b>{{countAllRegionsFemmesYear}}</b>
+				femmes ainsi que
+				<b>{{countEnfantsRegionsYear}}</b>
+				licences jeunes.</p>
+			<p style='text-align:center;'>Depuis la création de la région
+				{{regions.nom}}
+				le total est de
+				<b>{{countAllRegions}}</b>
+				licencié(e)s dont
+				<b>{{countAllRegionsHommes}}</b>
+				hommes et
+				<b>{{countAllRegionsFemmes}}</b>
+				femmes ainsi que
+				<b>{{countEnfantsRegion}}</b>
+				licences jeunes.</p>
+
+			<div style="text-align: center; margin-top: 50px;">
+				{{ form_start(formDate, {'action': path('exportByRegions', {'regionsId': regions.id, 'regionsName': regions.nom}) }) }}
+				<input type="hidden" name="regionsId" value="{{ regions.id }}"/>
+				<div style="display: inline-block;">
+					<p style='display:inline-block; margin-left:3%'>Début :</p>
+					{{ form_widget(formDate.dateDebut, { 'attr': {'style': "width:100%"} }) }}
+				</div>
+				<div style="display: inline-block;">
+					<p style='display:inline-block; margin-left:3%'>Fin :</p>
+					{{ form_widget(formDate.dateFin, { 'attr': {'style': "width:100%"} }) }}
+				</div>
+				{{ form_end(formDate) }}
+			</div>
+
+
+		{% else %}
+			<p style='font-size: 10em;text-align:center'>❌</p>
+			<p style='text-align:center'>
+				{% if app.user.type == 'Centre' %}Le{% else %}L'
+				{% endif %}
+				{{app.user.type}}
+				est désactivé(e) de FFNPRO<br>Veuillez contacter le secréteriat de la FFN pour réactivation.</p>
+		{% endif %}
+
+	{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Centres{% endblock %}
+
+{% block body %}
+
+    {% if app.user.id == 94 %}
+        {# TOP #}
+        <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Centres</h1>
+        <p style='text-align:center'>{{ app.user.nom }}</p>
+        <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+                        
+        <p style ='text-align:center'>Liste des Associations / Centres qui n'ont pris aucune licence cette année.</p>
+    
+        <table class="table table-striped" style="margin-top:2%;margin-left:10%;width:82%">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Initiale</th>
+                    <th>Type</th>
+                    <th>Identifiant</th>
+                    <th>Actif ?</th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for association in associationsPage %}
+                <tr>
+                    <td>{{ association.nom }}</td>
+                    <td>{{ association.initiale }}</td>
+                    <td>{{ association.type }}</td>
+                    <td>{{ association.email }}</td>
+                    {% if association.is_active == 1 %}
+                        <td>✔️</td>
+                    {% else %}
+                        <td>❌</td>
+                    {% endif %}
+                    <td>
+                        <a href="{{ path('associations_show', {'id': association.id}) }}">Voir</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="16">no records found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div style='margin-left:49%'>
+            {{ knp_pagination_render(associationsPage) }}
+        </div>
+    {% else %}
+        <p>Accès refusé</p>
+    {% endif %}
+
+{% endblock %}
+
+

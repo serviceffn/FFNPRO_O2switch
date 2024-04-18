@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Licencié(e)s{% endblock %}
+
+{% block body %}
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <p style='text-align:center'>{{ app.user.nom }}</p>
+    {% endif %}
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Identité</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+    <p style='font-size:70%;text-align:center'>Nom / Prénom : <b>{{ user.nom }} {{user.prenom}}</b></p>
+    <p style='font-size:70%;text-align:center'>Genre : <b>{{ user.genre }}</b></p>
+    <p style='font-size:70%;text-align:center'>Date de Naissance : {{ user.anniversaire |date('d-m-Y') }} </p>
+    <p style='font-size:70%;text-align:center'>Numéro Licence :<b>{{ user.nLicence}}</b> </p>
+    <p style='font-size:70%;text-align:center'>Centre émetteur : <b>{{ user.centreEmetteur}}</b></p>
+    <p style='font-size:70%;text-align:center'>Compte créer le : <b>{{ user.createdAt |date('d-m-Y')}}</b></p>
+    <p style='font-size:70%;text-align:center'>Compte renouvelé le : <b>{{ user.renouvellementAt |date('d-m-Y')}}</b></p>
+
+    <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Localisation</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+    <p style='font-size:70%;text-align:center'>Adresse : <b>{{ user.adresse }} </b></p>
+    <p style='font-size:70%;text-align:center'>Complément : <b>{{ user.complement }} </b></p>
+    <p style='font-size:70%;text-align:center'>Code Postal / Ville : <b>{{user.zip}} {{ user.ville }}</b></p>
+    <p style='font-size:70%;text-align:center'>Pays : <b>{{ user.pays }}</b></p>
+
+    <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Contact</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+    <p style='font-size:70%;text-align:center'>Téléphone : <b>{{ user.telephone }}</b></p>
+    <p style='font-size:70%;text-align:center'>Email : <b>{{ user.email }}</b></p>
+
+<div style="display: flex; justify-content: center; align-items: center;">
+    <a href="{{ path('users_edit', {'id': user.id}) }}" class='btn btn-success' style='margin: 3%;'>Modifier les informations</a>
+    {% if user.nLicence|slice(0, 4) != "now"|date("Y") %}
+       <a href="{{ path('choice_renouvellement', {'id': user.id}) }}">
+    {% endif %}
+    <a href="{{ path('qr_code', {'chaine': user.chaine}) }}" class='btn btn-primary' style='margin: 3%;'>Voir le QR Code</a> 
+    {% if app.user.id == 94  %}
+        <a href="{{ path('choice_renouvellement', {'id': user.id}) }} " class='btn btn-primary'>Renouveler la licence</a>
+        <a href="{{ path('pdfpdf', {'id': user.id}) }}" class='btn btn-primary' style='margin: 3%;'>Imprimer la licence</a> 
+        <form method="post" action="{{ path('users_delete', {'id': user.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');" style='margin: 3%;'>
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+        <button class="btn btn-danger" style='vertical-align: middle;'>Supprimer</button>
+    </form> 
+    {% endif %}
+    
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un(e) Association / Centre {% endblock %}
+
+{% block body %} 
+
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Centres</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    {{ form_start(form) }}
+    <div>
+        <p style='margin-bottom:0%;text-align:center'>Photo du centre : </p>
+        {{ form_widget(form.images, { 'attr': {'style': "width:30%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <div id="image-preview-container" style='text-align:center;margin-top:20px; margin-bottom:30px;'>
+            <img id="image-preview" src="" alt="Image Preview" width="100" height="100">
+            <div id="upload-success-message" style="color: green; font-weight: bold;"></div>
+        </div>
+        <p style='margin-bottom:0%;text-align:center'>Nom du centre : </p>{{ form_widget(form.nom, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Type : </p>{{ form_widget(form.type, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Initiale : </p>{{ form_widget(form.initiale, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Email à mettre sur licence: </p>{{ form_widget(form.email_assoc, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Email de connexion: </p>{{ form_widget(form.email, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Mot de passe : stopbodyshaming</p><br><br>
+        <p style='margin-bottom:0%;text-align:center'>Téléphone : </p>{{ form_widget(form.telephone_assoc, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+    </div>
+
+    <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Localisation</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+    <div>
+        <p style='margin-bottom:0%;text-align:center'>Adresse : </p>{{ form_widget(form.adresse, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Ville : </p>{{ form_widget(form.ville, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Code Postal  : </p>{{ form_widget(form.zip, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Région : </p>{{ form_widget(form.region, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Pays : </p>{{ form_widget(form.pays, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+    </div>
+
+    <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Président(e)</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+    <div>
+        <p style='margin-bottom:0%;text-align:center'>Prénom : </p>{{ form_widget(form.prenom_president, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Nom : </p>{{ form_widget(form.nom_presidebt, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Téléphone : </p>{{ form_widget(form.telephone_president, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+        <p style='margin-bottom:0%;text-align:center'>Email : </p>{{ form_widget(form.email_president, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }}
+    </div>
+    <button class="btn btn-success" style='margin-top:3%;width:15%;display:block;margin:0 auto !important;margin-top:5%'>{{ button_label|default('Ajouter un centre') }}</button>
+    {{ form_end(form) }}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.querySelector('#{{ form.images.vars.id }}');
+            const imagePreview = document.querySelector('#image-preview');
+            const successMessageContainer = document.getElementById('image-preview-container');
+            let successMessage = document.getElementById('upload-success-message');
+
+            if (!successMessage) {
+                successMessage = document.createElement('div');
+                successMessage.id = 'upload-success-message';
+                successMessage.style.color = 'green';
+                successMessage.style.fontWeight = 'bold';
+                successMessageContainer.appendChild(successMessage);
+            }
+
+            imageInput.addEventListener('input', function() {
+                const file = this.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.addEventListener('load', function() {
+                        imagePreview.setAttribute('src', reader.result);
+                        successMessage.innerHTML = 'L\'image a été chargée avec succès.';
+
+                    });
+
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.setAttribute('src', '');
+                    successMessage.innerHTML = '';
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% endblock %}

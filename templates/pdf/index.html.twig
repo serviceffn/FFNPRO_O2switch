@@ -1,0 +1,19 @@
+
+<div class="example-wrapper" style='float:left;max-width:50%;height:60%;'>
+            {% for users in user %}
+        <p style='margin:0 auto;font-size:0.72em;max-width:165%'>{{users.prenom}} {{users.nom}}<br>
+        Licence : {{users.n_licence}}<br>
+        {{users.nomm}}<br>
+        {{users.adresse}}<br>
+        {{users.zip}} {{users.ville}}<br>
+        <b style='text-decoration:underline'>{{users.email_assoc}}</b><br>
+</div>
+<img src="{{ asset('/uploads/' ~ users.name) }}" alt="Image" width="80" height="80" style='margin-left:20%;margin-top:3%'>
+        {% endfor %}
+{# {% block stylesheets %}
+            <link href="{{ asset('fonts/font.css') }}" rel="stylesheet" />
+        {% endblock %} #}
+        
+{# {{pic}} #}
+
+{# <img src="{{ asset('/uploads/midi.jpg') }}" width="70" height="70" style='margin-left:20%'>   #}

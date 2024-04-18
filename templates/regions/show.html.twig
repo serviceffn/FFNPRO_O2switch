@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Regions{% endblock %}
+
+{% block body %}
+
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Régions</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+        {% if regions.id == 1 %}
+            <img src="{{ asset('/regions-uploads/1.png') }}" alt="Image" width="150" height="100" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 2 %}
+            <img src="{{ asset('/regions-uploads/2.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 3 %}
+            <img src="{{ asset('/regions-uploads/3.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 4 %}
+            <img src="{{ asset('/regions-uploads/4.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 5 %}
+            <img src="{{ asset('/regions-uploads/5.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 6 %}
+            <img src="{{ asset('/regions-uploads/6.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 7 %}
+            <img src="{{ asset('/regions-uploads/7.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 8 %}
+            <img src="{{ asset('/regions-uploads/8.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 9 %}
+            <img src="{{ asset('/regions-uploads/9.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 10 %}
+            <img src="{{ asset('/regions-uploads/10.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 11 %}
+            <img src="{{ asset('/regions-uploads/11.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 12 %}
+            <img src="{{ asset('/regions-uploads/12.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 13 %}
+            <img src="{{ asset('/regions-uploads/13.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 14 %}
+            <img src="{{ asset('/regions-uploads/14.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 15 %}
+            <img src="{{ asset('/regions-uploads/15.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+        {% if regions.id == 16 %}
+            <img src="{{ asset('/regions-uploads/16.png') }}" alt="Image" width="150" style='margin:0 auto;display:block'>
+        {% endif %}
+
+
+    {# <p style='font-size:70%;text-align:center'><b>{{ region.nom }} </b></p> #}
+    
+    <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Président(e)</h2><hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+    <p style='font-size:90%;text-align:center'>Nom / Prénom : <b>{{ region.nomPresident }} {{region.prenomPresident}}</b></p>
+    <p style='font-size:90%;text-align:center'>Téléphone : <b>0{{ region.telephonePresident }}</b></p>
+    <p style='font-size:90%;text-align:center'>Email : <b>{{ region.emailPresident }}</b></p>
+    <div style="text-align:center;">
+        <a href="{{ path('regions_edit', {'id': region.id}) }}" class='btn btn-primary' style='margin-left:42%;margin-top:2%'>Changer de président(e)</a>
+    </div>
+{% endblock %}

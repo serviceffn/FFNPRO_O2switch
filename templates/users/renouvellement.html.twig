@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %} 
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    <p style='font-size: 10em;text-align:center'>✔️</p>
+     {% if app.request.attributes.get('_route') == 'users_renouvellement' %} 
+        <p style='text-align:center'>Le licencié <b>{{ user[0].nom }} {{user[0].prenom}}</b> a renouvelé sa licence.<br>Son nouveau numéro de licence est : <b>{{user[0].n_licence}}</b></p>
+     {% else %} 
+         <p style='text-align:center'>Le licencié <b>{{ user.nom }} {{user.prenom}}</b> a renouvelé sa licence.<br>Son nouveau numéro de licence est : <b>{{user.Nlicence}}</b></p> 
+     {% endif %} 
+        {% if app.user.id == 94 %}
+            {% if age >= 18 and app.user.type == 'Centre' %} 
+                <p style='text-align:center'>La FFN vous a facturé : 28€ <br>Total TTC : <b>28€</b></p>
+            {% elseif app.user.type == 'Association' and age >= 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 28€ <br>Total TTC : <b>28€</b></p>
+            {% elseif age < 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 0€ (Licence jeune -18)<br>Total TTC : <b>0€</b></p>
+            {% endif %} 
+        {% elseif app.user.id != 94 %} 
+            {% if age >= 18 and app.user.type == 'Centre' %} 
+                <p style='text-align:center'>La FFN vous a facturé : 23€ <br>Total TTC : <b>23€</b></p>
+            {% elseif app.user.type == 'Association' and age >= 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 23€ <br>Total TTC : <b>23€</b></p>
+            {% elseif age < 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 0€ (Licence jeune -18)<br>Total TTC : <b>0€</b></p>
+            {% endif %} 
+        {% endif %}
+
+        <div style="text-align:center;">
+            <a href="{{ path('accueil') }}" class="btn btn-primary" style='margin-top:3%;margin-bottom:3%;'>Retour au menu principal</a>
+        </div>
+{% endblock %}

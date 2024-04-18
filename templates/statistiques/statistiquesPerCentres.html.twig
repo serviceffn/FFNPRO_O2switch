@@ -1,0 +1,87 @@
+{# {% extends 'base.html.twig' %}
+
+{% block title %}Statistiques{% endblock %}
+
+{% block body %}
+    <h1>Liste des Centres</h1>
+
+    {% if allCentresList is not empty %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Adresse</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for centre in allCentresList %}
+                    <tr>
+                        <td>{{ centre.nom }}</td>
+                        <td>{{ centre.adresse }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucun centre à afficher.</p>
+    {% endif %}
+{% endblock %} #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Centres
+{% endblock %}
+	
+{% block body %}
+
+	<h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Statistiques</h1>
+	<p style='text-align:center'>{{ app.user.nom }}</p>
+	<hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    <h2 style='text-align:center'>Statistiques Centres {{ "now"|date("Y") }}</h2><br>
+
+
+	<div class="text-center" style="margin-top: 20px;">
+		<input type="text" id="searchInput" class="form-control" placeholder="Rechercher..." style="width: 50%; display: inline-block;">
+	</div>
+
+	{{ form_start(formDate) }}
+	<div style="text-align:center; margin-top: 10px;">
+		<p style='display:inline-block;margin-left:3%'>Début :
+		</p>
+		{{ form_widget(formDate.dateDebut, { 'attr': {'style': "display:inline-block; width: 30%"} }) }}
+		<p style='display:inline-block;margin-left:3%'>Fin :
+		</p>
+		{{ form_widget(formDate.dateFin, { 'attr': {'style': "display:inline-block; width: 30%"} }) }}
+		{{ form_widget(formDate.Exporter, { 'attr': {'style': "display:inline-block; margin-top:4%"} }) }}
+	</div>
+	{{ form_end(formDate) }}
+
+
+	<table class="table table-striped" style="margin-top:5%;margin-left:10%;width:82%">
+		<thead>
+			<tr>
+				<th>Centres</th>
+				<th>Adresses</th>
+			</tr>
+		</thead>
+		<tbody>
+            {% for centre in allCentresList %}
+				<tr>
+                    <td>{{ centre.nom }}</td>
+                    <td>{{ centre.adresse }}</td>
+
+					{# <td>
+						<a href="{{ path('statistiques_associations_id', {'id': user.id}) }}">Voir Détails</a>
+					</td> #}
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="16">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+
+{% endblock %}
+

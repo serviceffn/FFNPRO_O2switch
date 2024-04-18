@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %} 
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    {% if app.request.get('_route') == 'choice_edit_physique' %}
+        <p style='font-size: 10em;text-align:center'>✔️</p>
+        <p style='text-align:center'>Le licencié <b>{{user.nom}} {{user.prenom}}</b> a changé la méthode d'impression de sa licence.</p><br><br>
+        <div style="text-align:center;">
+            <a href="{{ path('pdfpdf', {'id': user.id}) }}" class="btn btn-success" style='margin-top:3%;margin-bottom:3%;margin:auto;display:block;width:30%'>Imprimer la licence</a><br>
+            <a href="{{ path('accueil') }}" class="btn btn-primary" style='margin-top:3%;margin-bottom:3%;margin:auto;display:block;width:30%'>Retour au menu principal</a>
+        </div>
+    {% else %}
+        <p style='font-size: 10em;text-align:center'>✔️</p>
+        <p style='text-align:center'>Le licencié <b>{{user.nom}} {{user.prenom}}</b> a changé la méthode d'impression de sa licence.</p><br><br>
+        <div style="text-align:center;">
+            <a href="{{ path('accueil') }}" class="btn btn-primary" style='margin-top:3%;margin-bottom:3%;margin:auto;display:block;width:30%'>Retour au menu principal</a>
+        </div>
+    {% endif %}
+{% endblock %}

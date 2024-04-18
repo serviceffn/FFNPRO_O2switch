@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+          <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="{{asset('css/sidebar.css')}}">
+
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {# Run `composer require symfony/webpack-encore-bundle`
+           and uncomment the following Encore helpers to start using Symfony UX #}
+        {% block stylesheets %}
+
+        {% endblock %}
+
+        {% block javascripts %}
+            {#{{ encore_entry_script_tags('app') }}#}
+        {% endblock %}
+    </head>
+    
+        {# <div class="w3-sidebar w3-light-grey w3-bar-block" style="width:25%;padding-top:2.15%">
+            <h3 class="w3-bar-item" style='color:#43A3C8'>FFNPRO</h3>
+                <a href="#" class="w3-bar-item w3-button" style='padding-top:13%'>Accueil</a><hr style='background-color:grey;border-none;height:0.5px'>
+                <a href="{{ path('users_index') }}" class="w3-bar-item w3-button" style='margin-top:3%;margin-bottom:3%'>Licencié(e)s</a><hr style='background-color:grey;border-none;height:0.5px'>
+                <a href="{{ path('associations_index') }}" class="w3-bar-item w3-button" style='margin-top:3%;margin-bottom:3%'>Centres</a><hr style='background-color:grey;border-none;height:0.5px'>
+                <a href="{{ path('regions_index') }}" class="w3-bar-item w3-button" style='margin-top:3%;margin-bottom:3%'>Régions</a><hr style='background-color:grey;border-none;height:0.5px'>
+                <a href="#" class="w3-bar-item w3-button">Statistiques</a><hr style='background-color:grey;border-none;height:0.5px'>    
+        </div> #}
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    
+                
+    {% if app.user.id == 94 %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <a class="navbar-brand" href="#">FFNPRO</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="{{ path('accueil') }}">Accueil <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="{{ path('users_index') }}">Licencié(e)s   </a>
+                <a class="nav-item nav-link" href="{{ path('associations_index') }}">Centres/Associations   </a>
+                <a class="nav-item nav-link" href="{{ path('regions_index') }}">Régions   </a>
+                <a class="nav-item nav-link" href="{{ path('dirigeant_index') }}">Direction   </a>
+                <a class="nav-item nav-link" href="{{ path('impression_associations') }}">Impression   </a>
+                <a class="nav-item nav-link" href="{{ path('statistiques_index') }}">Statistiques   </a>
+                <a class="nav-item nav-link" href="{{path('app_logout')}}" style='position: fixed; right:0;'>Vous êtes connecté en tant que : Administrateur | Se déconnecter</a>
+            </div>
+        </div>
+    </nav>
+    {% elseif app.user.roles == ["ROLE_USER"] %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <a class="navbar-brand" href="#">FFNPRO</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="{{ path('accueil') }}">Accueil <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="{{ path('users_centre', {'id': app.user.id}) }}">Licencié(e)s   </a>
+                <a class="nav-item nav-link" href="{{path('associations_view', {'id': app.user.id}) }}">{{app.user.type}}  </a>
+                <a class="nav-item nav-link" href="{{path('dirigeant_edit', {'id': app.user.id}) }}">Direction   </a>
+                <a class="nav-item nav-link" href="{{ path('statistiques_index') }}">Statistiques   </a>
+                <a class="nav-item nav-link" href="{{ path('help_index') }}">Centre d'aide   </a>
+                <a class="nav-item nav-link" href="{{path('app_logout')}}" style='position: fixed; right:0;'>Vous êtes connecté en tant que {{app.user.nom}} | Se déconnecter</a>
+            </div>
+        </div>
+    </nav>
+      
+      
+                {% endif %}
+
+            
+{% endif %}
+
+      
+      
+   
+    <body>
+         {% block body %}
+       
+        {% endblock %} 
+    </body>   
+    
+{# </html> #}

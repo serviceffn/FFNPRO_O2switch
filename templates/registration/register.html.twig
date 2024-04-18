@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un nouveau centre{% endblock %}
+
+{% block body %}
+    <h1>Créer un nouveau centre</h1>
+
+    {{ form_start(registrationForm) }}
+    {# Vérifier si la route est "annonces_edit" on affiche les images #}
+            {{ form_row(registrationForm.email) }} 
+            {% if app.request.attributes.get('_route') == 'register' %}
+            {{ form_row(registrationForm.plainPassword, {
+                label: 'Password'
+            }) }}
+            {{ form_row(registrationForm.agreeTerms) }}
+
+            {% endif %}
+            {{ form_row(registrationForm.nom) }}
+            {{ form_row(registrationForm.adresse) }}
+            {{ form_row(registrationForm.zip) }}
+            {{ form_row(registrationForm.ville) }}
+            {{ form_row(registrationForm.pays) }}
+            {{ form_row(registrationForm.nom_presidebt) }}
+            {{ form_row(registrationForm.prenom_president) }}
+            {{ form_row(registrationForm.email_president) }}
+            {{ form_row(registrationForm.telephone_president) }} 
+            {{ form_row(registrationForm.telephone_assoc) }} 
+            {{ form_row(registrationForm.telephone_president) }} 
+            {{ form_row(registrationForm.images) }} 
+            {{ form_row(registrationForm.is_active) }} 
+            <button type="submit" class="btn">Register</button>
+    {{ form_end(registrationForm) }}
+{% endblock %}

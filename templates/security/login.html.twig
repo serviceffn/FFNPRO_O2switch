@@ -1,0 +1,64 @@
+{# {% extends 'base.html.twig' %} #}
+
+
+{# {% block title %}FFNPRO - Connexion{% endblock %} #}
+<head>
+        
+        <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        {# <link rel="stylesheet" href="{{asset('css/sidebar.css')}}"> #}
+
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {# Run `composer require symfony/webpack-encore-bundle`
+           and uncomment the following Encore helpers to start using Symfony UX #}
+        {% block stylesheets %}
+
+        {% endblock %}
+
+        {% block javascripts %}
+                <script src="{{ asset('Js/showPassword.js') }}"></script>
+        {% endblock %}
+</head>
+{% block body %}
+
+<form method="post">
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="mb-3">
+            You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
+
+    <h1 class="h3 mb-3 font-weight-normal" style='color:#43A3C8;text-align:center;margin-top:10%'>FFNPRO</h1>
+    <div style='height:35em;width:50%;border:3px solid grey;border-radius:2%;margin-left:25%;background-color:#D3DEE2;margin-bottom:5%'>
+        <h2 style='text-align:center;font-size:110%;margin-bottom:10%;margin-top:7%'>Me connecter</h2>
+
+        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" placeholder='Email' style='text-align:center;width:75%;margin:auto;margin-bottom:10%' required autofocus>
+        <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" placeholder='Mot de passe' style='text-align:center;width:75%;margin:auto' required><br>
+        <input type="checkbox" onclick="myFunction()" style='margin-top:3%;width:15%;display:block;margin:1% auto !important;margin-top:5%'><p style='text-align:center'>Afficher mot de passe</p>
+        <input type="hidden" name="_csrf_token"
+            value="{{ csrf_token('authenticate') }}"
+        >
+
+        {#
+            Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
+            See https://symfony.com/doc/current/security/remember_me.html
+
+            <div class="checkbox mb-3">
+                <label>
+                    <input type="checkbox" name="_remember_me"> Remember me
+                </label>
+            </div>
+        #}
+
+        <button class="btn btn-lg btn-primary" style='margin-top:3%;display:block;margin:auto !important;margin-top:5%'type="submit">
+            Se connecter
+        </button>
+    </div> 
+</form>
+{% endblock %}

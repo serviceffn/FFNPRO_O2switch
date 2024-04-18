@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Impression
+{% endblock %}
+
+{% block body %}
+	<h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Impression</h1>
+	<p style='text-align:center'>{{ app.user.nom }}</p>
+	<hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+	<p style='margin-left:10%'>Reste à imprimer :
+		{{ count }}</p>
+
+	<table class="table table-striped" style="margin-top:1%;margin-left:10%;width:82%">
+		<thead>
+			<tr>
+				<th>Centre Emetteur</th>
+				<th>Nb Licences à éditer</th>
+				<th>Etat</th>
+				<th>actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for association in associations %}
+				<tr>
+					<td style='width:1000px'>{{ association.name }}</td>
+					<td style='width:1000px'>{{ association.totalLicences }}</td>
+					<td style='width:1000px'>❌</td>
+					<td style='width:1000px'>
+						<a href="{{ path('impression_associations_centre', {'id': association.idAssoc}) }}">Voir</a>
+					</td>
+
+
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

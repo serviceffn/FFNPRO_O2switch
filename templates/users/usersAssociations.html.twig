@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %}
+    
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    
+        <table class="table table-striped" style="margin-top:5%;margin-left:10%;width:82%">
+                <thead>
+                    <tr style=''>
+                        {# <th>Id</th> #}
+                        <th>Nom / Prénom</th>
+                        <th>Centre</th>
+                        <th>Licence</th>
+                        <th>Date Création</th>
+                        <th>Impression</th>
+                        <th>actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+            {% for user in associationsPage %}
+                <tr>
+                     {# <td>{{ user.id }}</td>  #}
+                    <td style='width:2000px'><b style='color:#43A3C8;'>{{ user.nom }}</b> {{ user.prenom }}</td>
+                    <td style='width:2000px'>{{ user.nomm }}</td> 
+                    <td style='width:1000px'>{{ user.n_licence }}</td>
+                    <td style='width:1000px'>{{ user.MostRecentDate|split(' ', 2)|first  }}</td>
+                    {% if user.is_imprimed == true and user.n_licence|split('-', 4)|first == "now"|date("Y")  %}
+                        <td style='width:1000px'>✔️ <a href="{{ path('users_update_imprimed_false', {'id': user.id}) }}" style='color:#43A3C8;'>Reset</a></td>
+                    {% elseif user.is_imprimed == false and user.n_licence|split('-', 4)|first == "now"|date("Y")   %}
+                        <td style='width:1000px'>❌</td>
+                    {% elseif user.n_licence|split('-', 4)|first != "now"|date("Y") %}
+                        <td style='width:1000px'>-</td>
+                    {% endif %}
+                    <td style='width:1000px'>
+                        <a href="{{ path('pdfpdf', {'id': user.id}) }}">Impression </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="13">no records found</td>
+                </tr>
+            {% endfor %}
+
+        </tbody> 
+    </table>
+    <div style='margin-left:41%'>
+        {{ knp_pagination_render(associationsPage) }}
+    </div> 
+    
+    
+{% endblock %}

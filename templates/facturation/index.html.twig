@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Facturation{% endblock %}
+
+{% block body %}
+
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Facturation</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    <p style='text-align:center;'>Facturation en travaux, ça arrive prochainement... (NON FONCTIONNEL)</p>
+    <a href="{{ path('facturation_mensuel') }}" class='btn btn-primary' style='margin-left:19%;margin-top:5%;'>Facturation Mensuel</a>
+    <a href="{{ path('facturation_annuel_association') }}" class='btn btn-primary' style='margin-left:3%;margin-top:5%;'>Facturation Annuel Associations</a>
+    <a href="{{ path('facturation_annuel_centre') }}" class='btn btn-primary' style='margin-left:3%;margin-top:5%;'>Facturation Annuel Centres</a>
+
+
+    
+
+{% endblock %}
+
+

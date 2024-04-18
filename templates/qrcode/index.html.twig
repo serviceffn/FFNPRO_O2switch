@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %} 
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>QRCode</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    {# <h1>Hello {{ controller_name }}! ✅</h1> #}
+
+     {# {% if qrcode and app.user.nom == user.centreEmetteur or app.user.id == 94 %}  #}
+        <img src={{ qrcode }} alt="qr-code" height='10%' width='10%' style='margin-left:45%'>
+        {% for user in users %}
+
+        <p style='text-align:center'> <b>{{users[0].nom}} {{users[0].prenom}}</b><br>Né le <b>{{users[0].anniversaire|date('d-m-Y')}}</b></p> 
+        <a href="{{ path('users_send_qrcode', {'chaine': users[0].chaine}) }}" class="btn btn-success" style='margin-top:3%;width:15%;display:block;margin:0 auto !important;margin-top:5%'>Renvoyer le QRCode (mail)</a>  
+     {# {% endif %}  #}
+
+        {% endfor %}
+    
+</div>
+{% endblock %}

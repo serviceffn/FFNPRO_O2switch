@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %}
+    
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+    
+
+{# <form method="get" action="{{ path('licence_direct_all') }}">
+    <div class="input-group">
+        <input type="text" class="form-control" name="q" placeholder="Rechercher un utilisateur...">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Rechercher</button>
+        </div>
+    </div>
+</form> #}
+
+<table class="table table-striped" style="margin-left:10%;width:82%">
+                <thead>
+                    <tr style=''>
+                        {# <th>Id</th> #}
+                        <th>Nom / Prénom</th>
+                        <th>Centre</th>
+                        <th>actions</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+        {% if app.user.id != 94 %}
+            {% for centre in associationsPages %}
+                <tr>
+                     <td>{{ user.entry_id }}</td> 
+                    <td>{{ user.meta_key }}</td>
+                    <td>{{ user.meta_value }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="13">no records found</td>
+                </tr>
+            {% endfor %}
+        {% elseif app.user.id == 94 %}
+            {% for user in associationsPage %}
+                <tr>
+                     {# <td>{{ user.id }}</td>  #}
+                    <td>{{ user.nom }} {{ user.prenom }}</td> 
+                    <td>Fédération Française du Naturisme</td>
+                    <td><a href="{{ path('licence_direct_add', {'entry_id': user.entry_id}) }}">Accepter la demande</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="13">no records found</td>
+                </tr>
+            {% endfor %}
+            {% if associationsPagee is empty %}
+{% else %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                     {# <td>{{ user.id }}</td>  #}
+                    <td>{{ user.nom }} {{ user.prenom }}</td> 
+                    <td>Fédération Française du Naturisme</td>
+                    <td><a href="{{ path('licence_direct_add', {'entry_id': user.entry_id}) }}">Accepter la demande</td>
+                </tr>
+        </thead>
+        <tbody>
+            {% for user in associationsPagee %}
+                <tr>
+                    <td>{{ user.prenom }}</td>
+                    <td>{{ user.nom }}</td>
+                    <td><a href="{{ path('licence_direct_add', {'entry_id': user.entry_id}) }}">Accepter la demande</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+            {% endif %}
+            {% endblock %}

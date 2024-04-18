@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques{% endblock %}
+
+{% block body %}
+    {# TOP #}
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Statistiques</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+
+    {% if app.user.id == 94 and app.request.attributes.get('_route') == 'statistiques_index'%}
+        <h2 style='text-align:center'>Statistique global depuis 2015 FFNPRO</h2><br>
+
+        <p style='text-align:center;'>Depuis la création de FFNPRO la FFN recueille un total de : <b>{{ffn}}</b> <br>
+        <p style='text-align:center;'><i>Dont </i>{{masculin}}<i> hommes et </i>{{feminin}}<i> femmes .</i> <br>
+        <p style='text-align:center;'><i>Mais encore </i>{{adulte}}<i> adultes et </i>{{ffn - adulte}}<i> enfants .</i> <br>
+        <hr>
+
+        <h2 style='text-align:center'>Statistique Année 2022</h2><br>
+        <p style='text-align:center;'>Cette année la FFN recueille un total de : <b>12658</b> <br>
+        <p style='text-align:center;'>La FFN (Licences Directs) recueille un total de  :<b>3227</b> <br>
+        <p style='text-align:center;'><i>Dont </i>3178<i> adultes et </i><i>49 enfants .</i> <br>
+        <p style='text-align:center;'>Les assocations recueillent un total de  : <b>8608</b> <br>
+        <p style='text-align:center;'><i>Dont </i>8073<i> adultes et </i>535<i> enfants .</i> <br>
+        <p style='text-align:center;'>Les centres recueillent un total de  : <b>704</b> <br>
+        <p style='text-align:center;'><i>Dont </i>700<i> adultes et </i>4<i> enfants .</i> <br>
+        <p style='text-align:center;'>Les régions recueillent un total de  : <b>119</b> <br>
+        <p style='text-align:center;'><i>Dont </i>113<i> adultes et </i>6<i> enfants .</i> <br>
+        <hr>
+        
+        <h2 style='text-align:center'>Statistique Année 2023</h2><br>
+        <p style='text-align:center;'>Cette année la FFN recueille un total de : <b>12965</b> <br>
+        <p style='text-align:center;'>La FFN (Licences Directs) recueille un total de  :<b>3629</b> <br>
+        <p style='text-align:center;'><i>Dont </i>3571<i> adultes et </i><i>58 enfants .</i> <br>
+        <p style='text-align:center;'>Les assocations recueillent un total de  : <b>8677</b> <br>
+        <p style='text-align:center;'><i>Dont </i>8163<i> adultes et </i>514<i> enfants .</i> <br>
+        <p style='text-align:center;'>Les centres recueillent un total de  : <b>522</b> <br>
+        <p style='text-align:center;'><i>Dont </i>517<i> adultes et </i>5<i> enfants .</i> <br>
+        <p style='text-align:center;'>Les régions recueillent un total de  : <b>137</b> <br>
+        <p style='text-align:center;'><i>Dont </i>133<i> adultes et </i>4<i> enfants .</i> <br>
+        <hr>
+
+
+
+        <h2 style='text-align:center'>Statistique Année {{ "now"|date("Y") }} FFNPRO</h2><br>
+        <p style='text-align:center;'>Cette année la FFN recueille un total de : <b>{{usersYear}}</b> <br>
+        <p style='text-align:center;'>La FFN (Licences Directs) recueille un total de  : <b>{{usersYearDirect}}</b> <br>
+        <p style='text-align:center;'><i>Dont </i><span style='font-weight:bold'>{{adulteYearDirect}}</span><i> adultes et </i><span style='font-weight:bold'>{{allMinorForTheActualYear}}</span><i> enfants .</i> <br>
+        <p style='text-align:center;'>Les assocations recueillent un total de  : <b>{{usersYearAssoc}}</b> <br>
+        <p style='text-align:center;'><i>Dont </i>{{adulteYearAssoc}}<i> adultes et </i>{{usersYearAssoc - adulteYearAssoc}}<i> enfants .</i> <br>
+        <p style='text-align:center;'>Les centres recueillent un total de  : <b>{{usersYearCentre}}</b> <br>
+        <p style='text-align:center;'><i>Dont </i>{{adulteYearCentre}}<i> adultes et </i>{{allMinorFromCentreForTheActualYear}}<i> enfants .</i> <br>
+        <p style='text-align:center;'>Les régions recueillent un total de  : <b>{{regionYear}}</b> <br>
+        <p style='text-align:center;'><i>Dont </i>{{adulteRegion}}<i> adultes et </i> {{regionYear - adulteRegion}}<i> enfants .</i> <br>
+        <hr>
+        
+        <h2 style='text-align:center'>Statistique Associations/Centres Année {{ "now"|date("Y") }} </h2><br>
+        <a href="{{ path('statistiques_associations_index') }}" class='btn btn-primary' style='margin-top:3%;width:25%;display:block;margin:auto !important;'>Associations et Centres</a>
+
+        <h2 style='text-align:center'>Licences régionale {{ "now"|date("Y") }} </h2><br>
+        <a href="{{ path('statistiques_regions_licence_seller') }}" class='btn btn-primary' style='margin-top:3%;width:25%;display:block;margin:auto !important;'>Licences régionales </a>
+                
+        <h2 style='text-align:center'>Centres {{ "now"|date("Y") }} </h2><br>
+        <a href="{{ path('statistiques_by_centres') }}" class='btn btn-primary' style='margin-top:3%;width:25%;display:block;margin:auto !important;'>Centres</a>
+        
+        <h2 style='text-align:center'>Statistique Régions Année {{ "now"|date("Y") }} </h2><br>
+        <a href="{{ path('regions_index') }}" class='btn btn-primary' style='margin-top:3%;width:25%;display:block;margin:auto !important;'>Statistiques par régions</a>
+    {% endif %}
+
+
+{% if app.user.id != 94 and app.request.attributes.get('_route') == 'statistiques_index'  %}
+    <h2 style='text-align:center'>Statistique Année {{ "now"|date("Y") }} [{{app.user.nom}}]</h2><br>
+    {% if allAssocByAssociation is defined %}
+        {# {{ dump(allAssocByAssociation) }}
+        {{ dump(hommeAssoc) }}
+        {{ dump(femmeAssoc) }}
+        {{ dump(adulteAssoc) }} #}
+        <p style='text-align:center;'>Licencié(e)s : {{allAssocByAssociation}} <br>
+        Hommes : {{hommeAssoc}} <br>
+        Femmes : {{femmeAssoc}}<br>
+        Adultes : {{adulteAssoc}}<br>
+        Enfants : {{allAssoc - adulteAssoc}}</p>
+    {% else %}
+        <p style='text-align:center;'>Licencié(e)s : Données non disponibles</p>
+    {% endif %}
+{% endif %}
+
+    
+    {% if app.user.id == 94 and  app.request.attributes.get('_route') == 'statistiques_associations_id' %}  
+
+        <h2 style='text-align:center'>Statistique Année {{ "now"|date("Y") }}</h2><br>
+        <p style='text-align:center;'>Licencié(e)s : {{allAssocByAssociation}} <br>
+        Hommes : {{hommeAssoc}} <br>
+        Femmes : {{femmeAssoc}}<br>
+        Adultes : {{adulteAssoc}}<br>
+        Enfants : {{allAssoc - adulteAssoc}}</p>
+    {% endif %}
+        
+{% endblock %}

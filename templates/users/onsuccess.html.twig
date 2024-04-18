@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FFNPRO{% endblock %}
+
+{% block body %} 
+    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
+    <p style='text-align:center'>{{ app.user.nom }}</p>
+    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
+   <p style='font-size: 10em;text-align:center'>✔️</p>
+        {% if app.user.id == 94 %}
+            <p style='text-align:center'>Le licencié <b>{{user.nom}} {{user.prenom}}</b> à acheter une nouvelle licence.<br>Son numéro de licence est : <b>{{user.nLicence}}</b></p>
+            {% if age >= 18 and app.user.type == 'Centre' %} 
+                <p style='text-align:center'>La FFN vous a facturé : 28€ <br>Total TTC : <b>28€</b></p>
+            {% elseif app.user.type == 'Association' and age >= 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 28€ <br>Total TTC : <b>28€</b></p>
+            {% elseif age < 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 0€ (Licence jeune -18)<br>Total TTC : <b>0€</b></p>
+            {% endif %} 
+        {% else %} 
+            {% if age >= 18 and app.user.type == 'Centre' %} 
+                <p style='text-align:center'>La FFN vous a facturé : 23€ <br>Total TTC : <b>23€</b></p>
+            {% elseif app.user.type == 'Association' and age >= 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 23€ <br>Total TTC : <b>23€</b></p>
+            {% elseif age < 18 %}
+                <p style='text-align:center'>La FFN vous a facturé : 0€ (Licence jeune -18)<br>Total TTC : <b>0€</b></p>
+            {% endif %} 
+        {% endif %}
+
+
+        {% if app.user.id == 94 %}
+            {% if app.request.attributes.get('_route') == 'users_new' %}
+                <a href="{{ path('users_new', {'id': app.user.id}) }}" class="btn btn-success" style='margin-top:3%;margin-left:40%;margin-bottom:2%'>Ajouter un(e) autre licencié(e)</a>
+            {% else %}
+                <a href="{{ path('users_index') }}" class="btn btn-success" style='margin-top:3%;margin-left:40%;margin-bottom:2%'>Renouveler un(e) autre licencié(e)</a>
+            {% endif %} 
+        {% else %}   
+            {% if app.request.attributes.get('_route') == 'users_new' %}
+                <a href="{{ path('users_new', {'id': app.user.id}) }}" class="btn btn-success" style='margin-top:3%;margin-left:40%;margin-bottom:2%'>Ajouter un(e) autre licencié(e)</a>
+            {% else %}
+                <a href="{{ path('users_centre', {'id': app.user.id}) }}" class="btn btn-success" style='margin-top:3%;margin-left:40%;margin-bottom:2%'>Renouveler un(e) autre licencié(e)</a>
+            {% endif %} 
+        {% endif%}    
+
+        <div style="text-align:center;">
+            <a href="{{ path('accueil') }}" class="btn btn-primary" style='margin-bottom:3%;'>Retour au menu principal</a>
+        </div>
+{% endblock %}

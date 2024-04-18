@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques
+{% endblock %}
+
+{% block body %}
+	<h1>Liste des Associations</h1>
+
+	{% if allAssociationList is not empty %}
+		<table>
+			<thead>
+				<tr>
+					<th>Nom</th>
+					<th>Adresse</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for association in allAssociationList %}
+					<tr>
+						<td>{{ association.nom }}</td>
+						<td>{{ association.adresse }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>Aucune association à afficher.</p>
+	{% endif %}
+{% endblock %}
