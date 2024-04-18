@@ -9,7 +9,8 @@
    <p style='font-size: 10em;text-align:center'>✔️</p>
         <p style='text-align:center'>Le/la licencié(e) <b>{{users.nom}} {{users.prenom}} né(e) le {{ users.anniversaire|date('Y-m-d') }}</b> à été modifié avec succès.</p>
         <div style="text-align: center;">
-            <a href="{{ path('users_renouvellement', {'id': users.id}) }}" class='btn btn-success' style='display: inline-block; margin-right: 10px;'>Renouveller la licence</a>
+            <a href="{{ path('users_renouvellement', {'id': users.id}) }}" class='btn btn-success' style='display: inline-block; margin-right: 10px;'>Renouvellement carte</a>
+            <a href="{{ path('qrcode_only', {'id': users.id}) }}" class='btn btn-success' style='display: inline-block; margin-right: 10px;'>Renouvellement QR-CODE</a>
             <a href="{{ path('accueil') }}" class="btn btn-primary" style='display: inline-block;'>Retour au menu principal</a>
         </div>
 {% endblock %}
