@@ -133,7 +133,7 @@ class UsersController extends AbstractController
         $associationsPage = $paginator->paginate($donneesSecreteriat, $request->query->getInt('page', 1), 25);
 
 
-        return $this->render('users/index.html.twig',  [
+        return $this->render('users/index.html.twig', [
             'users' => $users,
             'form' => $form->createView(),
             'formDate' => $formDate->createView(),
@@ -466,7 +466,7 @@ class UsersController extends AbstractController
             $historique->setAssociation($associations);
             $historique->setYear(date('Y'));
             $historique->setDate(new \DateTime());
-        
+
             $entityManager->persist($historique);
             $entityManager->flush();
 
@@ -528,24 +528,24 @@ class UsersController extends AbstractController
                     'age' => $difference,
                 ]);
             }
-        // } else {
+            // } else {
 
-        //     // if($user->getCentreEmetteur() == 160 )          
-        //     //  echo '<p style="color:red;font-weight:bold">Licencié bloqué de la FFN. Merci de refuser l\'adhésion de ce licencié.</p>';
-        //     //  else{
-        //     // echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.</p>';
+            //     // if($user->getCentreEmetteur() == 160 )          
+            //     //  echo '<p style="color:red;font-weight:bold">Licencié bloqué de la FFN. Merci de refuser l\'adhésion de ce licencié.</p>';
+            //     //  else{
+            //     // echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.</p>';
 
-        // }
+            // }
+        }
+        // $errorMessage = 'Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.';
+        // return $this->render('users/new.html.twig', [
+        //     'user' => $user,
+        //     'form' => $form->createView(),
+        //     'errorMessage' => $errorMessage,
+
+        // ]);
+
     }
-    // $errorMessage = 'Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.';
-    // return $this->render('users/new.html.twig', [
-    //     'user' => $user,
-    //     'form' => $form->createView(),
-    //     'errorMessage' => $errorMessage,
-
-    // ]);
-    
-}
 
     // /**
     //  * @Route("/send/email/{id}", name="users_send_email", methods={"GET","POST"})
@@ -796,7 +796,7 @@ class UsersController extends AbstractController
             $historique->setAssociation($associations);
             $historique->setYear(date('Y'));
             $historique->setDate(new \DateTime());
-        
+
             $entityManager->persist($historique);
             $entityManager->flush();
 
@@ -904,7 +904,7 @@ class UsersController extends AbstractController
         }
     }
 
-     /**
+    /**
      * @Route("/new/{id}", name="users_new", methods={"GET", "POST"})
      */
     public function new(Request $request, EntityManagerInterface $entityManager, UsersRepository $usersRepository, $id, MailerInterface $mailer, Associations $associations, QrCodeService $qrcodeService, AssociationsRepository $associationsRepository): Response
@@ -958,12 +958,9 @@ class UsersController extends AbstractController
             $anniversaire = $post->getAnniversaire();
             $difference = $now->diff($anniversaire, true)->y;
             $chaine = $post->getChaine();
-            // var_dump($chaine);die();
-
-            //new    
+   
             $existingUser = $usersRepository->findBy(['nom' => $nom, 'prenom' => $prenom]);
 
-            // ...
 
             if (!empty($existingUser)) {
                 foreach ($existingUser as $user) {
@@ -979,9 +976,17 @@ class UsersController extends AbstractController
                 }
             }
 
-            // Le reste du code
-// ...
 
+            $Checking_firstname_lastname_email = $usersRepository->findBy(['nom' => $nom, 'prenom' => $prenom, 'email' => $destinataire]);
+
+            if (!empty($Checking_firstname_lastname_email)) {
+                $errorMessage = 'Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.';
+                return $this->render('users/new.html.twig', [
+                    'user' => $user,
+                    'form' => $form->createView(),
+                    'errorMessage' => $errorMessage,
+                ]);
+            }
 
 
 
@@ -1032,8 +1037,6 @@ class UsersController extends AbstractController
                 $chaine = $user->getChaine();
 
 
-                // $associations->setAdulte($adulte+1);
-
                 $ids = $this->getUser()->getId();
                 $associations = $associationsRepository->find($ids);
                 $update = $associations->setUpdatedAt(new \DateTime());
@@ -1047,7 +1050,7 @@ class UsersController extends AbstractController
                 $historique->setAssociation($associations);
                 $historique->setYear(date('Y'));
                 $historique->setDate(new \DateTime());
-            
+
                 $entityManager->persist($historique);
                 $entityManager->flush();
 
@@ -1079,7 +1082,6 @@ class UsersController extends AbstractController
 
                     $html = "<html><body><div style='width:90%;border-radius:20px;border:1px solid black;box-shadow: 5px 10px 18px #888888;padding:5%' ><img src='" . $base64Imagee . "' alt='Image' height='10%' style='float:right;' >" . $users['nom'] . " " . $users['prenom'] . "<div  width='100%'' style='margin-right:35%'>" . $users['n_licence'] . "<br>" . $users['nomm'] . "<br>" . $users['adresseassoc'] . "<br>" . $users['villeassoc'] . " " . $users['zipassoc'] . "<br>" . $users['emailassoc'] . "</p></div><div style='display: flex;flex-direction: row;align-items: top;justify-content: left;margin-top:10%'><img src='" . $base64Imageeee . "'  alt='Image 2' style='' width='18%' height='20%'><div class='text-container' style='width:35%;position:absolute'><p style='font-size: 10px;font-weight: bold;margin: 0 20px;'>26 rue Paul Belmondo<br>75012 Paris - 01.48.10.31.00<br>contact@ffn-naturisme.com</p><br><div style='border-bottom: 1px solid black;margin-top:3%'></div><br><p style='font-size: 10px;position:absolute;font-weight: bold;margin: 0 20px;'>Assurance MAIF 4274207 D<br></div><img src='" . $base64Imageee . "'  alt='Image 2' style='width:15%;width: 80px;height: 80px;margin: 0 20px;margin-left:45%'> <img src='" . $base64Image . "'  alt='Image 2' style='width: 80px;height: 80px;margin: 0 20px;'> </div></div></body></html>";
 
-                    // Convertir le HTML en 
                     $options = new Options();
                     $options->setIsRemoteEnabled(true);
                     $dompdf = new Dompdf($options);
@@ -1105,31 +1107,31 @@ class UsersController extends AbstractController
                         $mailer->send($email);
                     }
                 }
-                
+
 
                 return $this->render('users/onsuccess.html.twig', [
                     'user' => $user,
                     'age' => $difference,
                 ]);
 
-            } 
+            }
         } else {
             // if($user->getCentreEmetteur() == 160 )
             //  echo '<p style="color:red;font-weight:bold">Licencié bloqué de la FFN. Merci de refuser l\'adhésion de ce licencié.</p>';
             //  else{
-            
-                // echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le transfert d\'association.</p>';
-                if ($form->isSubmitted()) {
-                    echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le transfert d\'association.</p>';
-                }
+
+            // echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le transfert d\'association.</p>';
+            if ($form->isSubmitted()) {
+                echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le transfert d\'association.</p>';
             }
-                // $errorMessage = '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.</p>';
-                return $this->render('users/new.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
-                    // 'errorMessage' => $errorMessage,
-                ]);
-    }        
+        }
+        // $errorMessage = '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.</p>';
+        return $this->render('users/new.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+            // 'errorMessage' => $errorMessage,
+        ]);
+    }
 
 
     /**
@@ -1389,7 +1391,7 @@ class UsersController extends AbstractController
             $historique->setAssociation($associations);
             $historique->setYear(date('Y'));
             $historique->setDate(new \DateTime());
-        
+
             $entityManager->persist($historique);
             $entityManager->flush();
 

@@ -37,9 +37,7 @@
             {# <p style="margin-bottom:0%;text-align:center">Impression licence : </p>{{ form_widget(form.is_imprimed, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }} #}
             <p style="margin-bottom:0%;text-align:center">L'adhérent(e) accepte d'être contacté par la FFN : </p>{{ form_widget(form.agree_terms, { 'attr': {'style': "width:40%;height:2em;margin:auto;display:block;margin-bottom:1%"} }) }} <br>       </div>
             {# <p style='position:absolute;visibility:hidden'>{{ form_widget(form.impression, { 'attr': {'style': 'visibility:hidden'} }) }}  </p>  #}
-            {% if  app.user.id == 94 %}
-            <p style='text-align:center'><b><a href="{{ path('choice_edit', {'id': app.request.get('id')}) }}" style='position: relative;top: 190%;transform: translate(-50%, -50%);'> > Modification Impression ou QRCode < </a></b></p><br>
-            {% endif %}
+
         <div style="text-align:center;">
             <button class="btn btn-success" style='margin-top:3%;width:15%;display:block;margin:1% auto !important;margin-top:5%'>{{ button_label|default('Valider les modifications') }}</button>
             <a href="{{ path('accueil') }}" class='btn btn-danger' style='margin-top:3%;width:15%;display:block;margin: 1% auto !important;'>Annuler les modifications</a>
