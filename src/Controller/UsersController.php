@@ -528,23 +528,7 @@ class UsersController extends AbstractController
                     'age' => $difference,
                 ]);
             }
-            // } else {
-
-            //     // if($user->getCentreEmetteur() == 160 )          
-            //     //  echo '<p style="color:red;font-weight:bold">Licencié bloqué de la FFN. Merci de refuser l\'adhésion de ce licencié.</p>';
-            //     //  else{
-            //     // echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.</p>';
-
-            // }
         }
-        // $errorMessage = 'Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.';
-        // return $this->render('users/new.html.twig', [
-        //     'user' => $user,
-        //     'form' => $form->createView(),
-        //     'errorMessage' => $errorMessage,
-
-        // ]);
-
     }
 
     // /**
@@ -764,8 +748,6 @@ class UsersController extends AbstractController
 
         $currentYear = $now->format('Y');
 
-        // Dates de début et de fin pour la désactivation
-// Dans votre contrôleur
         $disableDateCheck = $this->getParameter('disable_date_check');
         if (!$disableDateCheck) {
             $debutNovembre = new \DateTime($currentYear . '-11-01');
@@ -778,7 +760,6 @@ class UsersController extends AbstractController
                 ]);
             }
         }
-
 
         if ($licence_new != $licence) {
             $ids = $this->getUser()->getId();
@@ -878,10 +859,6 @@ class UsersController extends AbstractController
                     // 'form' => $formDematerialisation->createView(),
                 ]);
 
-
-
-
-
             }
         } elseif ($lenghtKeyError != 11) {
 
@@ -907,6 +884,7 @@ class UsersController extends AbstractController
     /**
      * @Route("/new/{id}", name="users_new", methods={"GET", "POST"})
      */
+
     public function new(Request $request, EntityManagerInterface $entityManager, UsersRepository $usersRepository, $id, MailerInterface $mailer, Associations $associations, QrCodeService $qrcodeService, AssociationsRepository $associationsRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -915,20 +893,10 @@ class UsersController extends AbstractController
         $form = $this->createForm(UsersType::class, $user);
         $form->handleRequest($request);
 
-        // CALCUL AGE
-        // $post = $form->getData();
         $now = new \DateTime();
-        $date = date('d.m.y');
-
-
-        // $users = $this->getDoctrine()->getRepository(UsersRepository::class)->find($id);
-        // $users->setCentreE($users->getGuru());
 
         $formContact = $this->createForm(ContactType::class);
         $formContact->handleRequest($request);
-
-
-
 
         if ($formContact->isSubmitted() && $form->isValid()) {
 
@@ -942,40 +910,28 @@ class UsersController extends AbstractController
             $currentDate = date('Y-m-d');
             $currentDate = date('Y-m-d', strtotime($currentDate));
 
-            $startDate = date('Y-m-d', strtotime("15/11/2022"));
-            $endDate = date('Y-m-d', strtotime("01/01/2022"));
-
-
-
-            // RECUPERER DONNEES POST
             $post = $form->getData();
-            $contenu = "FFN - Merci de vous être licencié, voici votre numéro de licence : " . $post->getNLicence() . "";
-            $postId = $post->getId();
             $destinataire = $post->getEmail();
-            $licence = $post->getNlicence();
             $nom = $post->getNom();
             $prenom = $post->getPrenom();
             $anniversaire = $post->getAnniversaire();
             $difference = $now->diff($anniversaire, true)->y;
             $chaine = $post->getChaine();
-   
-            $existingUser = $usersRepository->findBy(['nom' => $nom, 'prenom' => $prenom]);
 
+            $existingUser = $usersRepository->findOneBy(['nom' => $nom, 'prenom' => $prenom]);
 
-            if (!empty($existingUser)) {
-                foreach ($existingUser as $user) {
-                    $dateDifference = $user->getAnniversaire()->diff($anniversaire)->m; // Calcul de la différence en mois
-                    if ($dateDifference < 1) {
-                        $errorMessage = 'Licencié faisant déjà partie d\'un centre ou association avec une date de naissance similaire. Veuillez contacter la FFN pour le changement.';
-                        return $this->render('users/new.html.twig', [
-                            'user' => $user,
-                            'form' => $form->createView(),
-                            'errorMessage' => $errorMessage,
-                        ]);
-                    }
+            if ($existingUser) {
+                $dateDifference = $existingUser->getAnniversaire()->diff($anniversaire)->m;
+                if ($dateDifference < 1) {
+                    $errorMessage = 'Licencié faisant déjà partie d\'un centre ou association avec une date de naissance similaire. Veuillez contacter la FFN pour le changement.';
+                    return $this->render('users/new.html.twig', [
+                        'user' => $existingUser,
+                        'form' => $form->createView(),
+                        'errorMessage' => $errorMessage,
+                    ]);
                 }
             }
-
+            
 
             $Checking_firstname_lastname_email = $usersRepository->findBy(['nom' => $nom, 'prenom' => $prenom, 'email' => $destinataire]);
 
@@ -987,12 +943,6 @@ class UsersController extends AbstractController
                     'errorMessage' => $errorMessage,
                 ]);
             }
-
-
-
-            $qrCode = $qrcodeService->qrcode($chaine);
-
-
 
             $blockedUser = $usersRepository->findBlockUser($prenom, $nom, $anniversaire);
 
@@ -1011,12 +961,11 @@ class UsersController extends AbstractController
                 }
             }
 
-
-
             if (empty($blockedUser)) {
 
                 $charAuthorized = "0123456789";
                 $lenghtKey = 6;
+                
 
                 do {
                     $random = substr(str_shuffle($charAuthorized), 0, $lenghtKey);
@@ -1028,6 +977,7 @@ class UsersController extends AbstractController
                 } else {
                     $user->setIsImprimed(0);
                 }
+
                 $user->setCreatedAt(new \DateTime('now'));
                 $user->setRenouvellementAt(new \DateTime());
                 $user->setNLicence($key);
@@ -1116,16 +1066,11 @@ class UsersController extends AbstractController
 
             }
         } else {
-            // if($user->getCentreEmetteur() == 160 )
-            //  echo '<p style="color:red;font-weight:bold">Licencié bloqué de la FFN. Merci de refuser l\'adhésion de ce licencié.</p>';
-            //  else{
 
-            // echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le transfert d\'association.</p>';
             if ($form->isSubmitted()) {
                 echo '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le transfert d\'association.</p>';
             }
         }
-        // $errorMessage = '<p style="color:red;font-weight:bold">Licencié faisant déjà partie d\'un centre ou association. Veuillez contacter la FFN pour le changement.</p>';
         return $this->render('users/new.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
