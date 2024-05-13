@@ -20,9 +20,9 @@ class ExportService extends AbstractController
         $filename = date('d-m-Y') . '.csv';
 
         $results = $usersRepository->findByDateDebutAndFin($export->get('dateDebut')->getData(), $export->get('dateFin')->getData());
+        $now = new \DateTime();
 
         $header_ar = array('Licence;Nom;Prenom;Genre;Age;DateNaissance;Telephone;Email;Centre;Adresse;Complement;Zip;Ville;Pays;DemandeImpression;RGPD;Creation;Renouvellement;');
-
 
         $now = new \DateTime();
 
@@ -38,8 +38,8 @@ class ExportService extends AbstractController
                 $result['nom'],
                 $result['prenom'],
                 $result['genre'],
-                $now->diff($result['anniversaire'], true)->y,
-                $result['anniversaire']->format('d-m-Y'),
+                (new \DateTime($result['anniversaire']))->diff($now, true)->y,
+                (new \DateTime($result['anniversaire']))->format('d-m-Y'),
                 $result['telephone'],
                 $result['email'],
                 $result['nomm'],
@@ -50,8 +50,9 @@ class ExportService extends AbstractController
                 $result['pays'],
                 $result['impression'] == '0' ? 'Non' : 'Oui',
                 $result['agree_terms'] == '0' ? 'Non' : 'Oui',
-                $result['created_at']->format('d-m-Y'),
-                $result['renouvellement_at'] == '30-11--0001' ? '-' : $result['renouvellement_at']->format('d-m-Y'),
+                (new \DateTime($result['created_at']))->format('d-m-Y'),
+                $result['renouvellement_at'] == '30-11--0001' ? '-' : (new \DateTime($result['renouvellement_at']))->format('d-m-Y'),
+
             ];
 
             // array($result->getNom());

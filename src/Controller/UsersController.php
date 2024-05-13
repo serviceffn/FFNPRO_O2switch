@@ -640,18 +640,8 @@ class UsersController extends AbstractController
             } else {
                 echo 'Pas d\'adresse mail associé à ce compte';
             }
-
-
-
-
-
         }
-
-
-
-
     }
-
 
     /**
      * @Route("/centre/{id}/Alphabetic", name="users_centre_alphabetique", methods={"GET","POST"})

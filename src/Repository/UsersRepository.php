@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Users;
+use App\Entity\UsersFromAllYears;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\Expr\Join;
 use DoctrineExtensions\Query\Mysql\Greatest;
 
 /**
@@ -269,27 +271,27 @@ class UsersRepository extends ServiceEntityRepository
     public function showQrTrue($chaine)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT Users.id, Users.prenom, Users.chaine, Users.created_at, Users.email, Users.centre_emetteur_id as idassoc,  Users.renouvellement_at, Users.impression , Users.n_licence, Users.nom, Users.is_imprimed , Associations.nom as nomm, images.name, Associations.adresse as adresseassoc, Associations.ville as villeassoc, Associations.zip as zipassoc, Associations.initiale, Associations.email_assoc as emailassoc FROM Users LEFT JOIN Associations  ON Associations.id = Users.centre_emetteur_id LEFT JOIN images  ON images.associations_id = Associations.id WHERE Users.chaine = :chaine ';
-    
+
         $statement = $conn->prepare($sql);
-    
+
         // Vérifier si la préparation de la requête a réussi
         if ($statement === false) {
             throw new \Exception("Erreur de préparation de la requête SQL");
         }
-    
+
         $result = $statement->execute(['chaine' => $chaine]);
-    
+
         // Vérifier si l'exécution de la requête a réussi
         if ($result === false) {
             throw new \Exception("Erreur lors de l'exécution de la requête SQL");
         }
-    
+
         // Utiliser fetch au lieu de fetchAll
         return $statement->fetchAll();
     }
-    
+
 
     public function sortAlphabetic($id)
     {
@@ -396,64 +398,66 @@ class UsersRepository extends ServiceEntityRepository
     }
 
 
-    // $dateFin = $dateFin->modify('+1 day');
+    // // $dateFin = $dateFin->modify('+1 day');
+    // public function findByDateDebutAndFin($dateDebut, $dateFin)
+    // {
+    //     $currentYear = (new \DateTime())->format('Y');
+
+    //     return $this->createQueryBuilder('a')
+    //     ->select('a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate')
+    //     ->leftJoin(
+    //         'App\Entity\Associations',
+    //         'b',
+    //         'WITH',
+    //         'b.id = a.centre_emetteur'
+    //     )
+    //     ->andWhere('a.n_licence LIKE :licencePattern')
+    //     ->andWhere('(a.renouvellement_at >= :debut AND a.renouvellement_at <= :fin) OR (a.created_at >= :debut AND a.created_at <= :fin)')
+    //     ->setParameter('licencePattern', $currentYear . '-%')
+    //     ->setParameter('debut', $dateDebut->format('Y-m-d H:i:s'))
+    //     ->setParameter('fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'))
+    //     ->orderBy("MostRecentDate", "ASC")
+    //     ->getQuery()
+    //     ->getResult();
+    // }
+    
     public function findByDateDebutAndFin($dateDebut, $dateFin)
     {
         $currentYear = (new \DateTime())->format('Y');
-
-        return $this->createQueryBuilder('a')
-        ->select('a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate')
-        ->leftJoin(
-            'App\Entity\Associations',
-            'b',
-            'WITH',
-            'b.id = a.centre_emetteur'
-        )
-        ->andWhere('a.n_licence LIKE :licencePattern')
-        ->andWhere('(a.renouvellement_at >= :debut AND a.renouvellement_at <= :fin) OR (a.created_at >= :debut AND a.created_at <= :fin)')
-        ->setParameter('licencePattern', $currentYear . '-%')
-        ->setParameter('debut', $dateDebut->format('Y-m-d H:i:s'))
-        ->setParameter('fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'))
-        ->orderBy("MostRecentDate", "ASC")
-        ->getQuery()
-        ->getResult();
+        
+        $sql = "SELECT a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
+        (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
+        FROM Users a
+        LEFT JOIN Associations b ON b.id = a.centre_emetteur_id
+        WHERE a.n_licence LIKE :licencePattern
+        AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
+        ORDER BY MostRecentDate ASC";
+    
+        $em = $this->getEntityManager();
+        $stmt = $em->getConnection()->prepare($sql);
+        $stmt->execute([
+            'licencePattern' => $currentYear . '-%',
+            'debut' => $dateDebut->format('Y-m-d H:i:s'),
+            'fin' => $dateFin->modify('+1 day')->format('Y-m-d H:i:s')
+        ]);
+    
+        return $stmt->fetchAll();
     }
     
-
-
-    // ANCIENNE FONCTION , IL FAUDRAIT RETROUVER LE MOYEN DE CURRENT DATE DANS LE DQL
-    // public function findImpressionAssoc()
-    // {
-    //     return $this->createQueryBuilder('a')
-    //         ->select('a.id,a.n_licence ,b.nom,b.id as idAssoc,a.is_imprimed,count(a.id) as MostRecent')
-    //         ->leftJoin(
-    //             'App\Entity\Associations',
-    //             'b',
-    //             'WITH',
-    //             'b.id = a.centre_emetteur'
-    //         )
-    //         ->andWhere('a.is_imprimed = 0 and a.n_licence LIKE :licence')
-    //         ->setParameter('licence', "2022-%")
-    //         ->groupBy('b.nom')
-    //         ->getQuery()
-    //         ->getResult()
-    //     ;
-    // }
-
     public function findImpressionAssoc()
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT Associations.id as idAssoc, Associations.nom, COUNT(Users.id) as totalLicences
             FROM Users
             LEFT JOIN Associations ON Associations.id = Users.centre_emetteur_id
             WHERE Users.is_imprimed = 0 AND Users.n_licence LIKE CONCAT(year(CURRENT_DATE), "-%")
             GROUP BY Associations.id, Associations.nom;';
-        
+
         $statement = $conn->prepare($sql);
-    
+
         $resultSet = $statement->executeQuery();
-    
+
         return $resultSet->fetchAllAssociative();
     }
 
@@ -465,9 +469,9 @@ class UsersRepository extends ServiceEntityRepository
 
         $statement = $conn->prepare($sql);
 
-        $resultSet = $statement->executeQuery(); // instance de type Result
+        $resultSet = $statement->executeQuery();
 
-        return $resultSet->fetchAll(); // fetch sur Result, pas sur Statement :eyes:
+        return $resultSet->fetchAll();
     }
 
 
@@ -724,32 +728,32 @@ class UsersRepository extends ServiceEntityRepository
     public function getUsersByRegionAndCurrentYear($centreEmetteurId, $regionId): array
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT *, Associations.region_id
                 FROM Users
                 JOIN Associations ON Users.centre_emetteur_id = Associations.id
                 WHERE Users.centre_emetteur_id = :centre_emetteur_id
                     AND Users.n_licence LIKE :year_pattern
                     AND Associations.region_id = :region_id';
-    
+
         // dump($sql);
         // dump([
         //     'centre_emetteur_id' => $centreEmetteurId,
         //     'year_pattern' => '%' . date('Y') . '%',
         //     'region_id' => $regionId,
         // ]);
-    
+
         $statement = $conn->prepare($sql);
         $statement->execute([
             'centre_emetteur_id' => $centreEmetteurId,
             'year_pattern' => '%' . date('Y') . '%',
             'region_id' => $regionId,
         ]);
-    
+
         return $statement->fetchAllAssociative();
     }
-    
-    
+
+
 
 
     public function countAllAssocId($id): string
@@ -841,8 +845,8 @@ class UsersRepository extends ServiceEntityRepository
         JOIN Associations a ON u.centre_emetteur_id = a.id
         JOIN regions r ON a.region_id = r.id
         WHERE u.n_licence LIKE CONCAT(YEAR(CURDATE()), '-%')";
-        
-        
+
+
         // $sql = 'SELECT COUNT(*) as total_users FROM Users WHERE (created_at BETWEEN "2023-01-01" AND "2023-11-13") OR (renouvellement_at BETWEEN "2023-01-01" AND "2023-11-13" AND renouvellement_at IS NOT NULL)';
 
         $statement = $conn->prepare($sql);
@@ -881,7 +885,7 @@ class UsersRepository extends ServiceEntityRepository
         WHERE u.centre_emetteur_id = 94
         AND u.n_licence LIKE CONCAT(YEAR(CURDATE()), '-%')
         AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURDATE()) >= 18";
-        
+
 
         $statement = $conn->prepare($sql);
 
@@ -893,7 +897,7 @@ class UsersRepository extends ServiceEntityRepository
     public function countAllMinorsForTheActualYear(): int
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = "SELECT COUNT(DISTINCT u.id) AS total_utilisateurs_mineurs_centre_94
         FROM Users u
         JOIN Associations a ON u.centre_emetteur_id = a.id
@@ -901,15 +905,15 @@ class UsersRepository extends ServiceEntityRepository
         WHERE u.centre_emetteur_id = 94
         AND u.n_licence LIKE CONCAT(YEAR(CURDATE()), '-%')
         AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURDATE()) < 18";
-        
+
         $statement = $conn->prepare($sql);
-    
+
         $resultSet = $statement->executeQuery();
-    
+
         return $resultSet->fetchOne();
     }
-    
-    
+
+
 
     public function findAdulteYearAssoc(): string
     {
@@ -941,8 +945,8 @@ class UsersRepository extends ServiceEntityRepository
                 AND u.centre_emetteur_id != 94
                 AND u.n_licence LIKE CONCAT(YEAR(CURDATE()), '-%')
                 AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURDATE()) < 18";
-        
-        
+
+
         $statement = $conn->prepare($sql);
 
         $resultSet = $statement->executeQuery();
@@ -975,8 +979,8 @@ class UsersRepository extends ServiceEntityRepository
                 AND u.centre_emetteur_id != 94
                 AND u.n_licence LIKE CONCAT(YEAR(CURDATE()), '-%')
                 AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURDATE()) < 18";
-        
-        
+
+
         $statement = $conn->prepare($sql);
 
         $resultSet = $statement->executeQuery();
@@ -1130,7 +1134,7 @@ class UsersRepository extends ServiceEntityRepository
     public function countAdulteAssocForCsvExport($id, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
             AND year(CURRENT_DATE)-year(anniversaire) >= 18
@@ -1140,24 +1144,24 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'centre_emetteur_id' => $id,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
     public function countEnfantsAssocForCsvExport($id, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
             AND year(CURRENT_DATE) - year(anniversaire) < 18
@@ -1167,24 +1171,24 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'centre_emetteur_id' => $id,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
     public function countHommeAssocForCsvExport($id, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
             AND genre = "Masculin" 
@@ -1194,24 +1198,24 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'centre_emetteur_id' => $id,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
     public function countFemmeAssocForCsvExport($id, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
             AND genre = "Feminin" 
@@ -1221,24 +1225,24 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'centre_emetteur_id' => $id,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
     public function countAllAssocForCsvExport($id, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
             AND n_licence LIKE CONCAT(year(CURRENT_DATE), "-%")
@@ -1247,19 +1251,19 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'centre_emetteur_id' => $id,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
 
     public function getCentreEmetteurNames()
@@ -1278,7 +1282,7 @@ class UsersRepository extends ServiceEntityRepository
     public function countAdulteAssocForRegionLicenceSeller($idRegion, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :idRegion           
             AND year(CURRENT_DATE) - year(anniversaire) >= 18
@@ -1288,24 +1292,24 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'idRegion' => $idRegion,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
     public function countEnfantsAssocForRegionLicenceSeller($idRegion, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :idRegion      
             AND year(CURRENT_DATE) - year(anniversaire) < 18
@@ -1315,23 +1319,23 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'idRegion' => $idRegion,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
     public function countHommeAssocForRegionLicenceSeller($idRegion, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :idRegion             
             AND genre = "Masculin" 
@@ -1341,24 +1345,24 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'idRegion' => $idRegion,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
 
     public function countFemmeAssocForRegionLicenceSeller($idRegion, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :idRegion 
             AND genre = "Feminin" 
@@ -1368,23 +1372,23 @@ class UsersRepository extends ServiceEntityRepository
                 OR
                 (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
             )';
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'idRegion' => $idRegion,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
-    
+
     public function countAllAssocForRegionLicenceSeller($idRegion, $startingDate, $endingDate)
     {
         $conn = $this->getEntityManager()->getConnection();
-    
+
         $sql = "SELECT COUNT(*) FROM Users
         WHERE centre_emetteur_id = :idRegion 
         AND n_licence LIKE CONCAT(YEAR(CURRENT_DATE), '-%')
@@ -1393,46 +1397,17 @@ class UsersRepository extends ServiceEntityRepository
             OR
             (DATE(renouvellement_at) BETWEEN :start_date AND :end_date)
         )";
-    
+
         $statement = $conn->prepare($sql);
         $parameters = [
             'idRegion' => $idRegion,
             'start_date' => $startingDate,
             'end_date' => $endingDate,
         ];
-    
+
         $resultSet = $statement->executeQuery($parameters);
-    
+
         return $resultSet->fetchOne();
     }
 
-
-
-
-    // public function findByLiicence(int $id): array
-    // {
-    //     $conn = $this->getEntityManager()->getConnection();
-
-    //     $sql = '
-    //     SELECT SUBSTR(n_licence,-5) FROM users WHERE id = :id
-    //         ';
-    //     $stmt = $conn->prepare($sql);
-    //     $stmt->execute(['id' => $id]);
-
-    //     // returns an array of arrays (i.e. a raw data set)
-    //     return $stmt->fetchAll();
-    // }
-
-
-    /*
-    public function findOneBySomeField($value): ?Users
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }
