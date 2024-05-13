@@ -420,39 +420,90 @@ class UsersRepository extends ServiceEntityRepository
     //     ->getQuery()
     //     ->getResult();
     // }
+    // public function findByDateDebutAndFin($dateDebut, $dateFin)
+    // {
+    //     $yearDebut = $dateDebut->format('Y');
+    //     $yearFin = $dateFin->format('Y');
+    
+    //     $licencePattern = range($yearDebut, $yearFin);
+    
+    //     foreach ($licencePattern as &$year) {
+    //         $year = $year . '-%';
+    //     }
+    
+    //     $licencePatternString = implode(',', $licencePattern);
+    
+    //     $sql = "SELECT a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
+    //     (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
+    //     FROM Users a
+    //     LEFT JOIN Associations b ON b.id = a.centre_emetteur_id
+    //     WHERE a.n_licence LIKE :licencePattern
+    //     AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
+    //     ORDER BY MostRecentDate ASC";
+    
+    //     $em = $this->getEntityManager();
+    //     $stmt = $em->getConnection()->prepare($sql);
+    
+    //     $stmt->bindValue(':licencePattern', $licencePatternString);
+    
+    //     $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
+    //     $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
+    
+    //     $stmt->execute();
+    
+    //     return $stmt->fetchAll();
+    // }
+
     public function findByDateDebutAndFin($dateDebut, $dateFin)
-    {
-        $yearDebut = $dateDebut->format('Y');
-        $yearFin = $dateFin->format('Y');
-    
-        $licencePattern = range($yearDebut, $yearFin);
-    
-        foreach ($licencePattern as &$year) {
-            $year = $year . '-%';
-        }
-    
-        $licencePatternString = implode(',', $licencePattern);
-    
-        $sql = "SELECT a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
-        (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
-        FROM Users a
-        LEFT JOIN Associations b ON b.id = a.centre_emetteur_id
-        WHERE a.n_licence LIKE :licencePattern
-        AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
-        ORDER BY MostRecentDate ASC";
-    
-        $em = $this->getEntityManager();
-        $stmt = $em->getConnection()->prepare($sql);
-    
-        $stmt->bindValue(':licencePattern', $licencePatternString);
-    
-        $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
-    
-        $stmt->execute();
-    
-        return $stmt->fetchAll();
+{
+    $yearDebut = $dateDebut->format('Y');
+    $yearFin = $dateFin->format('Y');
+
+    $licencePattern = range($yearDebut, $yearFin);
+
+    foreach ($licencePattern as &$year) {
+        $year = $year . '-%';
     }
+
+    $licencePatternString = implode(',', $licencePattern);
+
+    $sql = "SELECT 
+            a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
+            (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
+        FROM 
+            Users a
+        LEFT JOIN 
+            Associations b ON b.id = a.centre_emetteur_id
+        WHERE 
+            a.n_licence LIKE :licencePattern
+            AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
+
+        UNION
+
+        SELECT 
+            c.id, c.imprimed_at, c.nom, c.prenom, c.n_licence, c.impression, c.agree_terms, c.created_at, d.nom as nomm, c.anniversaire, c.is_imprimed, c.genre, c.telephone, c.email, c.adresse, c.complement, c.zip, c.ville, c.pays, c.renouvellement_at, 
+            (CASE WHEN c.created_at > c.renouvellement_at THEN c.created_at ELSE c.renouvellement_at END) AS MostRecentDate
+        FROM 
+            UsersFromAllYears c
+        LEFT JOIN 
+            Associations d ON d.id = c.centre_emetteur_id
+        WHERE 
+            c.n_licence LIKE :licencePattern
+            AND ((c.renouvellement_at BETWEEN :debut AND :fin) OR (c.created_at BETWEEN :debut AND :fin))";
+
+    $em = $this->getEntityManager();
+    $stmt = $em->getConnection()->prepare($sql);
+
+    $stmt->bindValue(':licencePattern', $licencePatternString);
+
+    $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
+    $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
+
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
     
     public function findImpressionAssoc()
     {

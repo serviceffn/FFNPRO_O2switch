@@ -52,7 +52,6 @@ class ExportService extends AbstractController
                 $result['agree_terms'] == '0' ? 'Non' : 'Oui',
                 (new \DateTime($result['created_at']))->format('d-m-Y'),
                 $result['renouvellement_at'] == '30-11--0001' ? '-' : (new \DateTime($result['renouvellement_at']))->format('d-m-Y'),
-
             ];
 
             // array($result->getNom());
