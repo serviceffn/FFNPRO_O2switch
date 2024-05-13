@@ -420,11 +420,19 @@ class UsersRepository extends ServiceEntityRepository
     //     ->getQuery()
     //     ->getResult();
     // }
-    
     public function findByDateDebutAndFin($dateDebut, $dateFin)
     {
-        $currentYear = (new \DateTime())->format('Y');
-        
+        $yearDebut = $dateDebut->format('Y');
+        $yearFin = $dateFin->format('Y');
+    
+        $licencePattern = range($yearDebut, $yearFin);
+    
+        foreach ($licencePattern as &$year) {
+            $year = $year . '-%';
+        }
+    
+        $licencePatternString = implode(',', $licencePattern);
+    
         $sql = "SELECT a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
         (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
         FROM Users a
@@ -435,11 +443,13 @@ class UsersRepository extends ServiceEntityRepository
     
         $em = $this->getEntityManager();
         $stmt = $em->getConnection()->prepare($sql);
-        $stmt->execute([
-            'licencePattern' => $currentYear . '-%',
-            'debut' => $dateDebut->format('Y-m-d H:i:s'),
-            'fin' => $dateFin->modify('+1 day')->format('Y-m-d H:i:s')
-        ]);
+    
+        $stmt->bindValue(':licencePattern', $licencePatternString);
+    
+        $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
+        $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
+    
+        $stmt->execute();
     
         return $stmt->fetchAll();
     }
