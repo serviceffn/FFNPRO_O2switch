@@ -135,7 +135,7 @@
                     <td>{{ user.n_licence }}</td>
                     <td>{{ user.MostRecentDate|split(' ', 2)|first  }}</td>
                     {% if user.is_imprimed == true and user.n_licence|split('-', 4)|first == "now"|date("Y")  %}
-                        <td>✔️{% if user.impression == 0 %}(Qrcode envoyé le <b>{{user.renouvellement_at|date('d-m-Y')}}</b>){% else %}(Imprimée le <b>{{user.imprimed_at|date('d-m-Y')}}</b>)<br>{% endif %} <a href="{{ path('users_update_imprimed_false', {'id': user.id}) }}" style='color:#43A3C8;'>Reset</a></td>
+                        <td>✔️{% if user.impression == 0 %}(Qrcode envoyé le <b>{{user.imprimed_at|date('d-m-Y')}}</b>){% else %}(Imprimée le <b>{{user.imprimed_at|date('d-m-Y')}}</b>)<br>{% endif %} <a href="{{ path('users_update_imprimed_false', {'id': user.id}) }}" style='color:#43A3C8;'>Reset</a></td>
                     {% elseif user.is_imprimed == false and user.n_licence|split('-', 4)|first == "now"|date("Y")   %}
                         <td>❌</td>
                     {% elseif user.n_licence|split('-', 4)|first != "now"|date("Y") %}
