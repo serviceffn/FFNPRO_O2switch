@@ -383,7 +383,7 @@ class UsersRepository extends ServiceEntityRepository
     public function findLicenceByDESC()
     {
         return $this->createQueryBuilder('a')
-            ->select('a.id,a.imprimed_at,a.nom,a.prenom,a.n_licence,a.impression  ,a.created_at, a.is_imprimed ,b.nom as nomm,(CASE WHEN a.renouvellement_at > a.created_at THEN a.renouvellement_at ELSE a.created_at END) AS MostRecentDate')
+            ->select('a.id,a.imprimed_at,a.nom,a.prenom,a.n_licence,a.impression  ,a.created_at, a.renouvellement_at, a.is_imprimed ,b.nom as nomm,(CASE WHEN a.renouvellement_at > a.created_at THEN a.renouvellement_at ELSE a.created_at END) AS MostRecentDate')
             // ->select('substr(MostRecentDate,0,10)')
             ->leftJoin(
                 'App\Entity\Associations',

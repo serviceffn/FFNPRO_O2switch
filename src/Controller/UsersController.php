@@ -79,8 +79,6 @@ class UsersController extends AbstractController
 
         }
 
-
-
         if ($form->isSubmitted() && $form->isValid()) {
 
             $post = $form->getData();
