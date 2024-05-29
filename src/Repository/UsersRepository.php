@@ -495,6 +495,8 @@ class UsersRepository extends ServiceEntityRepository
                     WHERE a2.n_licence = c.n_licence
                       AND a2.nom = c.nom
                       AND a2.prenom = c.prenom
+                      AND a2.anniversaire = c.anniversaire
+                      AND a2.zip = c.zip
                 )";
     
         $em = $this->getEntityManager();
@@ -508,9 +510,7 @@ class UsersRepository extends ServiceEntityRepository
     
         return $stmt->fetchAll();
     }
-    
 
-    
     public function findImpressionAssoc()
     {
         $conn = $this->getEntityManager()->getConnection();
