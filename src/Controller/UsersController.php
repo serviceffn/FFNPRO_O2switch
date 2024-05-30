@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Associations;
 use App\Entity\Users;
+use App\Entity\UsersFromAllYears;
 use App\Entity\Historique;
 use App\Form\ContactType;
 use App\Form\ExportType;
@@ -75,8 +76,6 @@ class UsersController extends AbstractController
                 'associationsPage' => $associationsPage,
                 'formDematerialisation' => $formDematerialisation->createView(),
             ]);
-
-
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -371,6 +370,7 @@ class UsersController extends AbstractController
         $resultt = $usersRepository->searchWordpresss($searchTerm);
 
         $user = new Users();
+        $userFromAllYears = new UsersFromAllYears();
 
         $now = new \DateTime();
         $date = date('d.m.y');
@@ -426,10 +426,16 @@ class UsersController extends AbstractController
             $user->setCreatedAt(new \DateTime('now'));
             $user->setNom($nom);
             $user->setPrenom($prenom);
+
+            $userFromAllYears->setCreatedAt(new \DateTime('now'));
+            $userFromAllYears->setNom($nom);
+            $userFromAllYears->setPrenom($prenom);
             if ($genre == "Mr") {
                 $user->setGenre("Masculin");
+                $userFromAllYears->setGenre("Masculin");
             } else {
                 $user->setGenre("Feminin");
+                $userFromAllYears->setGenre("Feminin");
             }
             // if($qrcodeorimprimer == "Papier"){
             //     $user->setIsImprimed("0");
@@ -451,11 +457,28 @@ class UsersController extends AbstractController
             $user->setTelephone($telephone);
             $user->setEmail($destinataire);
 
+            $userFromAllYears->setZip($ville);
+            $userFromAllYears->setRenouvellementAt(new \DateTime('0000-00-00 00:00:00'));
+            $userFromAllYears->setNLicence($key);
+            $userFromAllYears->setIsActive(1);
+            $userFromAllYears->setCentreEmetteur($this->getUser());
+            $userFromAllYears->setChaine();
+            $userFromAllYears->setAnniversaire($anniversaire);
+            $userFromAllYears->setAdresse($adresse);
+            $userFromAllYears->setVille($ville);
+            $userFromAllYears->setPays($pays);
+            $userFromAllYears->setTelephone($telephone);
+            $userFromAllYears->setEmail($destinataire);
+
             $ids = $this->getUser()->getId();
             $associations = $associationsRepository->find($ids);
             $update = $associations->setUpdatedAt(new \DateTime());
 
             $entityManager->persist($user);
+            $entityManager->persist($update);
+            $entityManager->flush();
+
+            $entityManager->persist($userFromAllYears);
             $entityManager->persist($update);
             $entityManager->flush();
 
@@ -706,7 +729,7 @@ class UsersController extends AbstractController
     public function getRenouvellementLicence(UsersRepository $usersRepository, AssociationsRepository $associationsRepository, Request $request, Users $user, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService): Response
     {
 
-
+        $usersFromAllYears = new UsersFromAllYears();
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $form = $this->createForm(UsersType::class, $user);
@@ -757,6 +780,10 @@ class UsersController extends AbstractController
             $user->setNLicence($licence_new);
             $user->setRenouvellementAt(new \DateTime());
             $user->setIsImprimed(false);
+            
+            $usersFromAllYears->setNLicence($licence_new);
+            $usersFromAllYears->setRenouvellementAt(new \DateTime());
+            $usersFromAllYears->setIsImprimed(false);
 
             $entityManager->flush();
 
@@ -769,6 +796,8 @@ class UsersController extends AbstractController
             $entityManager->persist($historique);
             $entityManager->flush();
 
+            $entityManager->persist($usersFromAllYears);
+            $entityManager->flush();
 
             // RECUPERER DONNEES POST
             $post = $form->getData();
@@ -878,8 +907,10 @@ class UsersController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $user = new Users();
+        $userFromAllYears = new UsersFromAllYears();
         $form = $this->createForm(UsersType::class, $user);
         $form->handleRequest($request);
+        // dump($form->getData());
 
         $now = new \DateTime();
 
@@ -900,8 +931,17 @@ class UsersController extends AbstractController
 
             $post = $form->getData();
             $destinataire = $post->getEmail();
+            $adresse = $post->getAdresse();
             $nom = $post->getNom();
             $prenom = $post->getPrenom();
+            $genre = $post->getGenre();
+            $ville = $post->getVille();
+            $pays = $post->getPays();
+            $zip = $post->getZip();
+            $centre_emetteur = $post->getCentreEmetteur();
+            $region = $post->getRegion();
+            $telephone = $post->getTelephone();
+            $agree_terms = $post->getAgreeTerms();
             $anniversaire = $post->getAnniversaire();
             $difference = $now->diff($anniversaire, true)->y;
             $chaine = $post->getChaine();
@@ -973,6 +1013,26 @@ class UsersController extends AbstractController
                 $user->setCentreEmetteur($this->getUser());
                 $user->setChaine();
                 $chaine = $user->getChaine();
+                
+                $userFromAllYears->setNom($nom);
+                $userFromAllYears->setPrenom($prenom);
+                $userFromAllYears->setAdresse($adresse);
+                $userFromAllYears->setGenre($genre);
+                $userFromAllYears->setPays($pays);
+                $userFromAllYears->setZip($zip);
+                $userFromAllYears->setVille($ville);
+                $userFromAllYears->setEmail($destinataire);
+                $userFromAllYears->setTelephone($telephone);
+                $userFromAllYears->setAnniversaire($anniversaire);
+                $userFromAllYears->setRegion($region);
+                $userFromAllYears->setCreatedAt(new \DateTime('now'));
+                $userFromAllYears->setRenouvellementAt(new \DateTime());
+                $userFromAllYears->setNLicence($key);
+                $userFromAllYears->setIsActive(1);
+                $user->setImprimedAt(new \DateTime());
+                $userFromAllYears->setCentreEmetteur($this->getUser());
+                $userFromAllYears->setChaine();
+                $chaine = $user->getChaine();
 
 
                 $ids = $this->getUser()->getId();
@@ -981,6 +1041,9 @@ class UsersController extends AbstractController
 
                 $entityManager->persist($user);
                 $entityManager->persist($update);
+                $entityManager->flush();
+
+                $entityManager->persist($userFromAllYears);
                 $entityManager->flush();
 
                 $historique = new Historique();
