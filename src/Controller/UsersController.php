@@ -1290,13 +1290,12 @@ class UsersController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
     
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
-            $userId = $user->getId(); // Récupérer l'id de l'utilisateur à supprimer
+            $userId = $user->getId();
     
             // Supprimer l'utilisateur de la table Users
             $entityManager->remove($user);
             $entityManager->flush();
     
-            // Supprimer les entrées correspondantes dans la table UsersFromAllYears
             $usersFromAllYears = $usersFromAllYearsRepositoryRepository->findBy(['user_id' => $userId]); // Trouver les entrées dans UsersFromAllYears avec user_id correspondant
             foreach ($usersFromAllYears as $userFromAllYears) {
                 $entityManager->remove($userFromAllYears);
