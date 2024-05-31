@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Associations;
 use App\Entity\Users;
 use App\Entity\UsersFromAllYears;
+use App\Repository\UsersFromAllYearsRepository;
 use App\Entity\Historique;
 use App\Form\ContactType;
 use App\Form\ExportType;
@@ -469,6 +470,7 @@ class UsersController extends AbstractController
             $userFromAllYears->setPays($pays);
             $userFromAllYears->setTelephone($telephone);
             $userFromAllYears->setEmail($destinataire);
+            $userFromAllYears->setUserId($user->getId());
 
             $ids = $this->getUser()->getId();
             $associations = $associationsRepository->find($ids);
@@ -780,7 +782,7 @@ class UsersController extends AbstractController
             $user->setNLicence($licence_new);
             $user->setRenouvellementAt(new \DateTime());
             $user->setIsImprimed(false);
-            
+
             $usersFromAllYears->setNLicence($licence_new);
             $usersFromAllYears->setRenouvellementAt(new \DateTime());
             $usersFromAllYears->setIsImprimed(false);
@@ -959,7 +961,7 @@ class UsersController extends AbstractController
                     ]);
                 }
             }
-            
+
 
             $Checking_firstname_lastname_email = $usersRepository->findBy(['nom' => $nom, 'prenom' => $prenom, 'email' => $destinataire]);
 
@@ -993,7 +995,7 @@ class UsersController extends AbstractController
 
                 $charAuthorized = "0123456789";
                 $lenghtKey = 6;
-                
+
 
                 do {
                     $random = substr(str_shuffle($charAuthorized), 0, $lenghtKey);
@@ -1013,7 +1015,15 @@ class UsersController extends AbstractController
                 $user->setCentreEmetteur($this->getUser());
                 $user->setChaine();
                 $chaine = $user->getChaine();
-                
+
+                $ids = $this->getUser()->getId();
+                $associations = $associationsRepository->find($ids);
+                $update = $associations->setUpdatedAt(new \DateTime());
+
+                $entityManager->persist($user);
+                $entityManager->persist($update);
+                $entityManager->flush();
+
                 $userFromAllYears->setNom($nom);
                 $userFromAllYears->setPrenom($prenom);
                 $userFromAllYears->setAdresse($adresse);
@@ -1031,17 +1041,9 @@ class UsersController extends AbstractController
                 $userFromAllYears->setIsActive(1);
                 $user->setImprimedAt(new \DateTime());
                 $userFromAllYears->setCentreEmetteur($this->getUser());
+                $userFromAllYears->setUserId($user->getId());
                 $userFromAllYears->setChaine();
                 $chaine = $user->getChaine();
-
-
-                $ids = $this->getUser()->getId();
-                $associations = $associationsRepository->find($ids);
-                $update = $associations->setUpdatedAt(new \DateTime());
-
-                $entityManager->persist($user);
-                $entityManager->persist($update);
-                $entityManager->flush();
 
                 $entityManager->persist($userFromAllYears);
                 $entityManager->flush();
@@ -1283,17 +1285,43 @@ class UsersController extends AbstractController
     /**
      * @Route("/delete/{id}", name="users_delete", methods={"POST"})
      */
-    public function delete(Request $request, Users $user, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Users $user, EntityManagerInterface $entityManager, UsersFromAllYearsRepository $usersFromAllYearsRepositoryRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-
+    
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
+            $userId = $user->getId(); // Récupérer l'id de l'utilisateur à supprimer
+    
+            // Supprimer l'utilisateur de la table Users
             $entityManager->remove($user);
             $entityManager->flush();
+    
+            // Supprimer les entrées correspondantes dans la table UsersFromAllYears
+            $usersFromAllYears = $usersFromAllYearsRepositoryRepository->findBy(['user_id' => $userId]); // Trouver les entrées dans UsersFromAllYears avec user_id correspondant
+            foreach ($usersFromAllYears as $userFromAllYears) {
+                $entityManager->remove($userFromAllYears);
+            }
+            $entityManager->flush();
         }
-
+    
         return $this->redirectToRoute('accueil', [], Response::HTTP_SEE_OTHER);
     }
+    
+
+    // public function delete(Request $request, Users $user, EntityManagerInterface $entityManager): Response
+    // {
+    //     $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+    //     if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
+    //         $entityManager->remove($user);
+    //         $entityManager->flush();
+    //     }
+
+    //     return $this->redirectToRoute('accueil', [], Response::HTTP_SEE_OTHER);
+    // }
+
+
+
 
     /**
      * @Route("/reset/imprimed", name="users_update_imprimed_all", methods={"POST","GET"})
