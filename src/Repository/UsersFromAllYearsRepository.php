@@ -19,3 +19,5 @@ class UsersFromAllYearsRepository extends ServiceEntityRepository
     }
 
 }
+
+
