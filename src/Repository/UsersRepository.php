@@ -454,79 +454,81 @@ class UsersRepository extends ServiceEntityRepository
     //     return $stmt->fetchAll();
     // }
     public function findByDateDebutAndFin($dateDebut, $dateFin)
-{
-    $yearDebut = $dateDebut->format('Y');
-    $yearFin = $dateFin->format('Y');
-    $currentYear = (new \DateTime())->format('Y');
-
-    $licencePattern = range($yearDebut, $yearFin);
-
-    foreach ($licencePattern as &$year) {
-        $year = $year . '-%';
+    {
+        $yearDebut = $dateDebut->format('Y');
+        $yearFin = $dateFin->format('Y');
+        $currentYear = (new \DateTime())->format('Y');
+    
+        $licencePattern = range($yearDebut, $yearFin);
+    
+        foreach ($licencePattern as &$year) {
+            $year = $year . '-%';
+        }
+    
+        $licencePatternString = implode(',', $licencePattern);
+    
+        $em = $this->getEntityManager();
+    
+        if (in_array($currentYear . '-%', $licencePattern)) {
+            // SQL query without the join
+            $sql = "SELECT DISTINCT 
+                    a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
+                    (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
+                FROM 
+                    Users a
+                LEFT JOIN 
+                    Associations b ON b.id = a.centre_emetteur_id
+                WHERE 
+                    a.n_licence LIKE :licencePattern
+                    AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
+                ORDER BY MostRecentDate ASC";
+        } else {
+            // Original SQL query with the join
+            $sql = "SELECT DISTINCT 
+                    a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
+                    (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
+                FROM 
+                    Users a
+                LEFT JOIN 
+                    Associations b ON b.id = a.centre_emetteur_id
+                WHERE 
+                    a.n_licence LIKE :licencePattern
+                    AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
+        
+                UNION DISTINCT
+        
+                SELECT 
+                    c.id, c.imprimed_at, c.nom, c.prenom, c.n_licence, c.impression, c.agree_terms, c.created_at, d.nom as nomm, c.anniversaire, c.is_imprimed, c.genre, c.telephone, c.email, c.adresse, c.complement, c.zip, c.ville, c.pays, c.renouvellement_at, 
+                    (CASE WHEN c.created_at > c.renouvellement_at THEN c.created_at ELSE c.renouvellement_at END) AS MostRecentDate
+                FROM 
+                    UsersFromAllYears c
+                LEFT JOIN 
+                    Associations d ON d.id = c.centre_emetteur_id
+                WHERE 
+                    c.n_licence LIKE :licencePattern
+                    AND ((c.renouvellement_at BETWEEN :debut AND :fin) OR (c.created_at BETWEEN :debut AND :fin))
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM Users a2
+                        WHERE a2.n_licence = c.n_licence
+                          AND a2.nom = c.nom
+                          AND a2.prenom = c.prenom
+                          AND a2.anniversaire = c.anniversaire
+                    )
+                ORDER BY MostRecentDate ASC";
+        }
+    
+        $stmt = $em->getConnection()->prepare($sql);
+        $stmt->bindValue(':licencePattern', $licencePatternString);
+        $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
+        $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
+    
+        $stmt->execute();
+    
+        return $stmt->fetchAll();
     }
-
-    $licencePatternString = implode(',', $licencePattern);
-
-    $em = $this->getEntityManager();
-
-    if (in_array($currentYear . '-%', $licencePattern)) {
-        // SQL query without the join
-        $sql = "SELECT DISTINCT 
-                a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
-                (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
-            FROM 
-                Users a
-            LEFT JOIN 
-                Associations b ON b.id = a.centre_emetteur_id
-            WHERE 
-                a.n_licence LIKE :licencePattern
-                AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))";
-    } else {
-        // Original SQL query with the join
-        $sql = "SELECT DISTINCT 
-                a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
-                (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
-            FROM 
-                Users a
-            LEFT JOIN 
-                Associations b ON b.id = a.centre_emetteur_id
-            WHERE 
-                a.n_licence LIKE :licencePattern
-                AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))
     
-            UNION DISTINCT
-    
-            SELECT 
-                c.id, c.imprimed_at, c.nom, c.prenom, c.n_licence, c.impression, c.agree_terms, c.created_at, d.nom as nomm, c.anniversaire, c.is_imprimed, c.genre, c.telephone, c.email, c.adresse, c.complement, c.zip, c.ville, c.pays, c.renouvellement_at, 
-                (CASE WHEN c.created_at > c.renouvellement_at THEN c.created_at ELSE c.renouvellement_at END) AS MostRecentDate
-            FROM 
-                UsersFromAllYears c
-            LEFT JOIN 
-                Associations d ON d.id = c.centre_emetteur_id
-            WHERE 
-                c.n_licence LIKE :licencePattern
-                AND ((c.renouvellement_at BETWEEN :debut AND :fin) OR (c.created_at BETWEEN :debut AND :fin))
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM Users a2
-                    WHERE a2.n_licence = c.n_licence
-                      AND a2.nom = c.nom
-                      AND a2.prenom = c.prenom
-                      AND a2.anniversaire = c.anniversaire
-                )";
-    }
 
-    $stmt = $em->getConnection()->prepare($sql);
-    $stmt->bindValue(':licencePattern', $licencePatternString);
-    $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
-    $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
-
-    $stmt->execute();
-
-    return $stmt->fetchAll();
-}
-
-    
     public function findImpressionAssoc()
     {
         $conn = $this->getEntityManager()->getConnection();
@@ -575,7 +577,7 @@ class UsersRepository extends ServiceEntityRepository
             ->setParameter('debut', $dateDebut->format('Y-m-d'))
             ->setParameter('fin', $dateFin->format('Y-m-d'))
             ->setParameter('val', $id)
-            ->orderBy("MostRecentDate", "DESC")
+            ->orderBy("MostRecentDate", "ASC")
             ->getQuery()
             ->getResult()
         ;
