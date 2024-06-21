@@ -454,18 +454,35 @@ class UsersRepository extends ServiceEntityRepository
     //     return $stmt->fetchAll();
     // }
     public function findByDateDebutAndFin($dateDebut, $dateFin)
-    {
-        $yearDebut = $dateDebut->format('Y');
-        $yearFin = $dateFin->format('Y');
-    
-        $licencePattern = range($yearDebut, $yearFin);
-    
-        foreach ($licencePattern as &$year) {
-            $year = $year . '-%';
-        }
-    
-        $licencePatternString = implode(',', $licencePattern);
-    
+{
+    $yearDebut = $dateDebut->format('Y');
+    $yearFin = $dateFin->format('Y');
+    $currentYear = (new \DateTime())->format('Y');
+
+    $licencePattern = range($yearDebut, $yearFin);
+
+    foreach ($licencePattern as &$year) {
+        $year = $year . '-%';
+    }
+
+    $licencePatternString = implode(',', $licencePattern);
+
+    $em = $this->getEntityManager();
+
+    if (in_array($currentYear . '-%', $licencePattern)) {
+        // SQL query without the join
+        $sql = "SELECT DISTINCT 
+                a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
+                (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
+            FROM 
+                Users a
+            LEFT JOIN 
+                Associations b ON b.id = a.centre_emetteur_id
+            WHERE 
+                a.n_licence LIKE :licencePattern
+                AND ((a.renouvellement_at BETWEEN :debut AND :fin) OR (a.created_at BETWEEN :debut AND :fin))";
+    } else {
+        // Original SQL query with the join
         $sql = "SELECT DISTINCT 
                 a.id, a.imprimed_at, a.nom, a.prenom, a.n_licence, a.impression, a.agree_terms, a.created_at, b.nom as nomm, a.anniversaire, a.is_imprimed, a.genre, a.telephone, a.email, a.adresse, a.complement, a.zip, a.ville, a.pays, a.renouvellement_at, 
                 (CASE WHEN a.created_at > a.renouvellement_at THEN a.created_at ELSE a.renouvellement_at END) AS MostRecentDate
@@ -497,19 +514,19 @@ class UsersRepository extends ServiceEntityRepository
                       AND a2.prenom = c.prenom
                       AND a2.anniversaire = c.anniversaire
                 )";
-    
-        $em = $this->getEntityManager();
-        $stmt = $em->getConnection()->prepare($sql);
-    
-        $stmt->bindValue(':licencePattern', $licencePatternString);
-        $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
-    
-        $stmt->execute();
-    
-        return $stmt->fetchAll();
     }
 
+    $stmt = $em->getConnection()->prepare($sql);
+    $stmt->bindValue(':licencePattern', $licencePatternString);
+    $stmt->bindValue(':debut', $dateDebut->format('Y-m-d H:i:s'));
+    $stmt->bindValue(':fin', $dateFin->modify('+1 day')->format('Y-m-d H:i:s'));
+
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
+    
     public function findImpressionAssoc()
     {
         $conn = $this->getEntityManager()->getConnection();
