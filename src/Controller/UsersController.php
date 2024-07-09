@@ -7,6 +7,7 @@ use App\Entity\Users;
 use App\Entity\UsersFromAllYears;
 use App\Repository\UsersFromAllYearsRepository;
 use App\Entity\Historique;
+use App\Entity\Facture;
 use App\Form\ContactType;
 use App\Form\ExportType;
 use App\Form\SearchUsersType;
@@ -1055,6 +1056,15 @@ class UsersController extends AbstractController
                 $historique->setDate(new \DateTime());
 
                 $entityManager->persist($historique);
+                $entityManager->flush();
+
+                $facture = new Facture();
+                $facture->setUserId($user->getId());
+                $facture->setAssociationId(1);
+                $facture->setCreatedAt(new \DateTime());
+                $facture->setUpdatedAt(new \DateTime());
+
+                $entityManager->persist($facture);
                 $entityManager->flush();
 
 

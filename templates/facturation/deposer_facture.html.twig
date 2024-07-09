@@ -1,0 +1,12 @@
+{# templates/facturation/deposer_facture.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Déposer une Facture{% endblock %}
+
+{% block body %}
+    <h1>Déposer une Facture pour {{ association.nom }}</h1>
+    {{ form_start(form) }}
+        {{ form_row(form.pdfContent) }}
+        <button type="submit" class="btn btn-primary">Envoyer</button>
+    {{ form_end(form) }}
+{% endblock %}
