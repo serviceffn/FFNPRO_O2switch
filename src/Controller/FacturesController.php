@@ -37,6 +37,7 @@ class FacturesController extends AbstractController
         $facture->setCreatedAt(new \DateTime());
         $facture->setUpdatedAt(new \DateTime());
 
+        $idAssociation = $facture->setAssociationId($association->getId());
 
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
@@ -64,6 +65,7 @@ class FacturesController extends AbstractController
         return $this->render('facturation/deposer_facture.html.twig', [
             'form' => $form->createView(),
             'association' => $association,
+            'idAssociation' => $idAssociation
         ]);
     }
 

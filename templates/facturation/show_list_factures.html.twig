@@ -10,7 +10,7 @@
             <tr>
                 <th>ID</th>
                 <th>Association ID</th>
-                <th>Créé le</th>
+                <th>Mis en ligne le</th>
                 <th>Mis à jour le</th>
                 <th>PDF</th>
             </tr>
@@ -24,7 +24,7 @@
                     <td>{{ facture.updatedAt ? facture.updatedAt|date('Y-m-d H:i:s') : 'N/A' }}</td>
                     <td>
                         {% if facture.pdfContent %}
-                            <a href="{{ path('download_pdf', { 'id': facture.id }) }}" target="_blank">Voir PDF</a>
+                            <a href="{{ path('download_pdf', { 'id': facture.id }) }}" target="_blank">Voir la facture</a>
                         {% else %}
                             Pas de facture disponible
                         {% endif %}
