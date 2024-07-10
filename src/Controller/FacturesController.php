@@ -37,8 +37,6 @@ class FacturesController extends AbstractController
         $facture->setCreatedAt(new \DateTime());
         $facture->setUpdatedAt(new \DateTime());
 
-        $idAssociation = $facture->setAssociationId($association->getId());
-
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
 
@@ -48,6 +46,7 @@ class FacturesController extends AbstractController
                 try {
                     $pdfContent = file_get_contents($pdfFile->getPathname());
                     $facture->setPdfContent($pdfContent);
+                    $facture->setPdfFilename($form->get('pdfFilename')->getData()); // Enregistrer le nom du fichier PDF
                 } catch (\Exception $e) {
                     // Gérer l'exception si la lecture du fichier échoue
                     $this->addFlash('error', 'Une erreur est survenue lors du traitement du fichier PDF.');
@@ -65,7 +64,6 @@ class FacturesController extends AbstractController
         return $this->render('facturation/deposer_facture.html.twig', [
             'form' => $form->createView(),
             'association' => $association,
-            'idAssociation' => $idAssociation
         ]);
     }
 
@@ -81,7 +79,7 @@ class FacturesController extends AbstractController
         ]);
     }
 
-     /**
+    /**
      * @Route("/factures/download/{id}", name="download_pdf")
      */
     public function downloadPdf(Facture $facture): Response

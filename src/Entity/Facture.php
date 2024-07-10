@@ -46,7 +46,12 @@ class Facture
     /**
      * @ORM\Column(type="blob", nullable=true)
      */
-    private $pdfContent; // Contenu du fichier PDF en base64
+    private $pdfContent;
+
+      /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $pdfFilename;
 
     public function getId(): ?int
     {
@@ -124,4 +129,19 @@ class Facture
 
         return $this;
     }
+
+
+    public function getPdfFilename(): ?string
+    {
+        return $this->pdfFilename;
+    }
+
+    public function setPdfFilename(?string $pdfFilename): self
+    {
+        $this->pdfFilename = $pdfFilename;
+
+        return $this;
+    }
+
+    
 }

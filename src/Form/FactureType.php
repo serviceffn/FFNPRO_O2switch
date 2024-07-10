@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Facture;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextType; // Ajouté pour le champ pdfFilename
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
@@ -27,7 +28,10 @@ class FactureType extends AbstractType
                     ])
                 ],
             ])
-        ;
+            ->add('pdfFilename', TextType::class, [
+                'label' => 'Nom du fichier PDF',
+                'required' => true,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
