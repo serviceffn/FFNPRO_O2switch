@@ -96,4 +96,30 @@ class FacturesController extends AbstractController
         return $this->redirectToRoute('show_list_factures');
     }
 
+
+/**
+ * @Route("/factures/edit/{id}", name="edit_facture")
+ */
+public function editFacture(Request $request, Facture $facture, EntityManagerInterface $entityManager): Response
+{
+    $form = $this->createForm(FactureType::class, $facture);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $facture->setUpdatedAt(new \DateTime());
+
+        $entityManager->persist($facture);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le nom de la facture a été modifié avec succès.');
+        return $this->redirectToRoute('show_list_factures');
+    }
+
+    return $this->render('facturation/edit_facture.html.twig', [
+        'form' => $form->createView(),
+        'facture' => $facture,
+    ]);
+}
+
+
 }
