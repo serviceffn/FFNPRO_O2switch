@@ -67,4 +67,33 @@ class FacturesController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/factures/show", name="show_list_factures")
+     */
+    public function showAllFactures(EntityManagerInterface $entityManager): Response
+    {
+        $factures = $entityManager->getRepository(Facture::class)->findAll();
+
+        return $this->render('facturation/show_list_factures.html.twig', [
+            'factures' => $factures,
+        ]);
+    }
+
+     /**
+     * @Route("/factures/download/{id}", name="download_pdf")
+     */
+    public function downloadPdf(Facture $facture): Response
+    {
+        if ($facture->getPdfContent()) {
+            $pdfContent = stream_get_contents($facture->getPdfContent());
+            return new Response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="facture_' . $facture->getId() . '.pdf"',
+            ]);
+        }
+
+        $this->addFlash('error', 'Le fichier PDF n\'existe pas.');
+        return $this->redirectToRoute('show_list_factures');
+    }
+
 }
