@@ -1,3 +1,4 @@
+{# templates/facturation/index.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Factures{% endblock %}
@@ -24,7 +25,7 @@
                 <td>{{ association.nom }}</td>
                 <td>
                     <a href="{{ path('deposer_facture', { 'id': association.id }) }}" class="btn btn-sm btn-primary">Déposer une Facture</a>
-                    <a href="{{ path('show_list_factures', { 'id': association.id }) }}" class="btn btn-sm btn-secondary">Voir toutes les Factures</a>
+                    <a href="{{ path('show_list_factures', { 'associationId': association.id }) }}" class="btn btn-sm btn-secondary">Voir toutes les Factures</a>
                 </td>
             </tr>
         {% endfor %}

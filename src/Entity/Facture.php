@@ -18,10 +18,10 @@ class Facture
      */
     private $id;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
+   /**
+     * @ORM\Column(name="associationId", type="integer", nullable=true)
      */
-    private $association_id;
+    private $associationId;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -60,12 +60,12 @@ class Facture
 
     public function getAssociationId(): ?int
     {
-        return $this->association_id;
+        return $this->associationId;
     }
 
-    public function setAssociationId(int $association_id): self
+    public function setAssociationId(int $associationId): self
     {
-        $this->association_id = $association_id;
+        $this->associationId = $associationId;
 
         return $this;
     }

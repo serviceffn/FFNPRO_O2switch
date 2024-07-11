@@ -68,14 +68,15 @@ class FacturesController extends AbstractController
     }
 
     /**
-     * @Route("/factures/show", name="show_list_factures")
+     * @Route("/factures/show/{associationId}", name="show_list_factures")
      */
-    public function showAllFactures(EntityManagerInterface $entityManager): Response
+    public function showAllFactures(EntityManagerInterface $entityManager, int $associationId): Response
     {
-        $factures = $entityManager->getRepository(Facture::class)->findAll();
+        $factures = $entityManager->getRepository(Facture::class)->findBy(['associationId' => $associationId]);
 
         return $this->render('facturation/show_list_factures.html.twig', [
             'factures' => $factures,
+            'associationId' => $associationId
         ]);
     }
 
@@ -93,33 +94,30 @@ class FacturesController extends AbstractController
         }
 
         $this->addFlash('error', 'Le fichier PDF n\'existe pas.');
-        return $this->redirectToRoute('show_list_factures');
+        return $this->redirectToRoute('show_list_factures', ['associationId' => $facture->getAssociationId()]);
     }
 
+    /**
+     * @Route("/factures/edit/{id}", name="edit_facture")
+     */
+    public function editFacture(Request $request, Facture $facture, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(FactureType::class, $facture);
+        $form->handleRequest($request);
 
-/**
- * @Route("/factures/edit/{id}", name="edit_facture")
- */
-public function editFacture(Request $request, Facture $facture, EntityManagerInterface $entityManager): Response
-{
-    $form = $this->createForm(FactureType::class, $facture);
-    $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $facture->setUpdatedAt(new \DateTime());
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $facture->setUpdatedAt(new \DateTime());
+            $entityManager->persist($facture);
+            $entityManager->flush();
 
-        $entityManager->persist($facture);
-        $entityManager->flush();
+            $this->addFlash('success', 'Le nom de la facture a été modifié avec succès.');
+            return $this->redirectToRoute('show_list_factures', ['associationId' => $facture->getAssociationId()]);
+        }
 
-        $this->addFlash('success', 'Le nom de la facture a été modifié avec succès.');
-        return $this->redirectToRoute('show_list_factures');
+        return $this->render('facturation/edit_facture.html.twig', [
+            'form' => $form->createView(),
+            'facture' => $facture,
+        ]);
     }
-
-    return $this->render('facturation/edit_facture.html.twig', [
-        'form' => $form->createView(),
-        'facture' => $facture,
-    ]);
-}
-
-
 }
