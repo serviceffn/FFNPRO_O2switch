@@ -11,6 +11,8 @@ use App\Entity\Associations;
 use App\Entity\Facture;
 use App\Form\FactureType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 class FacturesController extends AbstractController
 {
@@ -27,10 +29,10 @@ class FacturesController extends AbstractController
         ]);
     }
 
-    /**
+      /**
      * @Route("/factures/deposer/{id}", name="deposer_facture")
      */
-    public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager): Response
+    public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
         $facture = new Facture();
         $facture->setAssociationId($association->getId());
@@ -58,6 +60,8 @@ class FacturesController extends AbstractController
             $entityManager->persist($facture);
             $entityManager->flush();
 
+            $this->sendEmailNotification($mailer, $association, $facture);
+
             $this->addFlash('success', 'La facture a été déposée avec succès.');
             return $this->redirectToRoute('factures_index');
         }
@@ -66,6 +70,17 @@ class FacturesController extends AbstractController
             'form' => $form->createView(),
             'association' => $association,
         ]);
+    }
+
+    private function sendEmailNotification(MailerInterface $mailer, Associations $association, Facture $facture)
+    {
+        $email = (new Email())
+            ->from('no.reply.naturisme@gmail.com')
+            ->to($association->getEmailPresident())
+            ->subject('Nouvelle facture FFN')
+            ->html(sprintf('Une nouvelle facture a été déposée dans votre espace FFN PRO %s.', $association->getNom()));
+
+        $mailer->send($email);
     }
 
 
