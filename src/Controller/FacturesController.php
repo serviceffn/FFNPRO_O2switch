@@ -139,5 +139,17 @@ class FacturesController extends AbstractController
         return $this->redirectToRoute('show_list_factures', ['associationId' => $facture->getAssociationId()]);
     }
 
+    /**
+     * @Route("/factures/association/{id}", name="factures_association")
+     */
+    public function facturesAssociation(Associations $association, EntityManagerInterface $entityManager): Response
+    {
+        $factures = $entityManager->getRepository(Facture::class)->findBy(['associationId' => $association->getId()]);
+
+        return $this->render('facturation/factures_association.html.twig', [
+            'factures' => $factures,
+            'association' => $association,
+        ]);
+    }
 
 }

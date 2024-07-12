@@ -29,7 +29,7 @@ class FactureType extends AbstractType
                         ],
                         'mimeTypesMessage' => 'Veuillez télécharger un document PDF valide',
                     ]),
-                    $isDeposerAction ? new NotBlank(['message' => 'Veuillez télécharger un fichier PDF']) : null,
+
                 ],
             ])
             ->add('pdfFilename', TextType::class, [

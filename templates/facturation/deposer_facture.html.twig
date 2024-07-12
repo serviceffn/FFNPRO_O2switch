@@ -3,10 +3,16 @@
 {% block title %}Déposer une Facture{% endblock %}
 
 {% block body %}
-    <h1>Déposer une Facture pour {{ association.nom }}</h1>
-    {{ form_start(form) }}
-        {{ form_row(form.pdfContent) }}
-        {{ form_row(form.pdfFilename) }}
-        <button type="submit" class="btn btn-primary">Envoyer</button>
-    {{ form_end(form) }}
+    <div class="container">
+        <h1>Déposer une Facture pour {{ association.nom }}</h1>
+        {{ form_start(form, { 'attr': {'class': 'form-horizontal'} }) }}
+            <div class="form-group">
+                {{ form_row(form.pdfContent, { 'attr': {'class': 'form-control-file'} }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.pdfFilename, { 'attr': {'class': 'form-control'} }) }}
+            </div>
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+        {{ form_end(form) }}
+    </div>
 {% endblock %}
