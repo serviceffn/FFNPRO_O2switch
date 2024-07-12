@@ -30,9 +30,47 @@
                             Pas de facture disponible
                         {% endif %}
                         <a href="{{ path('edit_facture', { 'id': facture.id }) }}" class="btn btn-primary">Modifier</a>
+                        
+                        {# Formulaire pour supprimer la facture #}
+                        <form method="post" action="{{ path('delete_facture', { 'id': facture.id }) }}" class="delete-form" data-id="{{ facture.id }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ facture.id) }}">
+                            <button class="btn btn-danger">Supprimer</button>
+                        </form>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteForms = document.querySelectorAll('form.delete-form');
+
+            deleteForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cette facture?')) {
+                        const id = form.dataset.id;
+                        const token = form.querySelector('input[name="_token"]').value;
+                        
+                        fetch(`/factures/delete/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Une erreur est survenue.');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

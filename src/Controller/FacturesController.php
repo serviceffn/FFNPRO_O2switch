@@ -37,7 +37,9 @@ class FacturesController extends AbstractController
         $facture->setCreatedAt(new \DateTime());
         $facture->setUpdatedAt(new \DateTime());
 
-        $form = $this->createForm(FactureType::class, $facture);
+        $form = $this->createForm(FactureType::class, $facture, [
+            'is_deposer_action' => true
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -48,7 +50,6 @@ class FacturesController extends AbstractController
                     $facture->setPdfContent($pdfContent);
                     $facture->setPdfFilename($form->get('pdfFilename')->getData()); // Enregistrer le nom du fichier PDF
                 } catch (\Exception $e) {
-                    // Gérer l'exception si la lecture du fichier échoue
                     $this->addFlash('error', 'Une erreur est survenue lors du traitement du fichier PDF.');
                     return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
                 }
@@ -66,6 +67,7 @@ class FacturesController extends AbstractController
             'association' => $association,
         ]);
     }
+
 
     /**
      * @Route("/factures/show/{associationId}", name="show_list_factures")
@@ -120,4 +122,22 @@ class FacturesController extends AbstractController
             'facture' => $facture,
         ]);
     }
+
+    /**
+     * @Route("/factures/delete/{id}", name="delete_facture", methods={"DELETE"})
+     */
+    public function deleteFacture(Request $request, Facture $facture, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $facture->getId(), $request->headers->get('X-CSRF-TOKEN'))) {
+            $entityManager->remove($facture);
+            $entityManager->flush();
+            $this->addFlash('success', 'La facture a été supprimée avec succès.');
+        } else {
+            $this->addFlash('error', 'La validation CSRF a échoué.');
+        }
+
+        return $this->redirectToRoute('show_list_factures', ['associationId' => $facture->getAssociationId()]);
+    }
+
+
 }
