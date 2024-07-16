@@ -29,7 +29,7 @@ class FacturesController extends AbstractController
         ]);
     }
 
-      /**
+    /**
      * @Route("/factures/deposer/{id}", name="deposer_facture")
      */
     public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
@@ -78,11 +78,18 @@ class FacturesController extends AbstractController
 
         $email = (new Email())
             ->from('no.reply.naturisme@gmail.com')
-            ->to($association->getEmailPresident())
-            ->addTo($association->getEmailSecretaireGeneral())
-            ->addTo($association->getEmailTresorier())
-            ->subject('Nouvelle facture FFN')
+            ->to($association->getEmailPresident());
+
+        if ($association->getEmailSecretaireGeneral()) {
+            $email->addTo($association->getEmailSecretaireGeneral());
+        }
+
+        if ($association->getEmailTresorier()) {
+            $email->addTo($association->getEmailTresorier());
+        }
+        $email->subject('Nouvelle facture FFN')
             ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
+            Bonjour<br>
             Une nouvelle facture a été déposée dans votre espace FFN PRO. <br><br>
             Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
             Agréable journée !<br>
@@ -90,21 +97,21 @@ class FacturesController extends AbstractController
 
         $email->embed(fopen($logoPath, 'r'), 'logo');
 
-    
+
         $pdfContent = $facture->getPdfContent();
         $pdfFilename = $facture->getPdfFilename();
-    
+
         if ($pdfContent && $pdfFilename) {
             $email->attach($pdfContent, $pdfFilename, 'application/pdf');
         } else {
             // Gérer le cas où le contenu PDF ou le nom de fichier est manquant
             throw new \Exception('PDF content or filename is missing.');
         }
-    
+
         // Envoi de l'email
         $mailer->send($email);
     }
-    
+
 
 
     /**
