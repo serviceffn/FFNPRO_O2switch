@@ -9,8 +9,6 @@
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Association ID</th>
                 <th>Date de la facture</th>
                 <th>Mis en ligne le</th>
                 <th>Action</th>
@@ -19,8 +17,7 @@
         <tbody>
             {% for facture in factures %}
                 <tr>
-                    <td>{{ facture.id }}</td>
-                    <td>{{ facture.associationId }}</td>
+
                     <td>{{ facture.pdfFilename }}</td>
                     <td>{{ facture.createdAt|date('Y-m-d H:i:s') }}</td>
                     <td>

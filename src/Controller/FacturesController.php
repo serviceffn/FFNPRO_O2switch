@@ -74,14 +74,37 @@ class FacturesController extends AbstractController
 
     private function sendEmailNotification(MailerInterface $mailer, Associations $association, Facture $facture)
     {
+        $logoPath = '../public/uploads/94.png';
+
         $email = (new Email())
             ->from('no.reply.naturisme@gmail.com')
             ->to($association->getEmailPresident())
+            ->addTo($association->getEmailSecretaireGeneral())
+            ->addTo($association->getEmailTresorier())
             ->subject('Nouvelle facture FFN')
-            ->html(sprintf('Une nouvelle facture a été déposée dans votre espace FFN PRO %s.', $association->getNom()));
+            ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
+            Une nouvelle facture a été déposée dans votre espace FFN PRO. <br><br>
+            Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
+            Agréable journée !<br>
+            Fédération Française de Naturisme');
 
+        $email->embed(fopen($logoPath, 'r'), 'logo');
+
+    
+        $pdfContent = $facture->getPdfContent();
+        $pdfFilename = $facture->getPdfFilename();
+    
+        if ($pdfContent && $pdfFilename) {
+            $email->attach($pdfContent, $pdfFilename, 'application/pdf');
+        } else {
+            // Gérer le cas où le contenu PDF ou le nom de fichier est manquant
+            throw new \Exception('PDF content or filename is missing.');
+        }
+    
+        // Envoi de l'email
         $mailer->send($email);
     }
+    
 
 
     /**

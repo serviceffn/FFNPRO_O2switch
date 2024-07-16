@@ -89,6 +89,16 @@ class Associations implements UserInterface
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    private $email_secretaire_general;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $email_tresorier;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private $email_assoc;
 
     /**
@@ -443,6 +453,32 @@ class Associations implements UserInterface
 
         return $this;
     }
+
+
+    public function getEmailSecretaireGeneral(): ?string
+    {
+        return $this->email_secretaire_general;
+    }
+
+    public function setEmailSecretaireGeneral(?string $email_secretaire_general): self
+    {
+        $this->email_secretaire_general = $email_secretaire_general;
+
+        return $this;
+    }
+
+    public function getEmailTresorier(): ?string
+    {
+        return $this->email_tresorier;
+    }
+
+    public function setEmailTresorier(?string $email_tresorier): self
+    {
+        $this->email_tresorier = $email_tresorier;
+
+        return $this;
+    }
+
 
     public function getUpdatedAt(): ?\DateTimeInterface
     {

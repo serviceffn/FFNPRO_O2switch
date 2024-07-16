@@ -69,7 +69,21 @@
             <p style='position:absolute;'>Nom : </p>{{ form_widget(form.nom_presidebt, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
             <p style='position:absolute;'>Téléphone : </p>{{ form_widget(form.telephone_president, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
             <p style='position:absolute;'>Email : </p>{{ form_widget(form.email_president, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+                    <p style='position:absolute;'>Email du Secrétaire Général : </p>{{ form_widget(form.email_secretaire_general, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+            <p style='position:absolute;'>Email du Trésorier : </p>{{ form_widget(form.email_tresorier, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
         </div>
+
+              {# <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Secrétaire Général</h2>
+        <hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div style='margin-left:35%'>
+            <p style='position:absolute;'>Email : </p>{{ form_widget(form.email_secretaire_general, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+        </div> #}
+{# 
+        <h2 style='color:#43A3C8;text-align:center;font-size:1.5em'>Trésorier</h2>
+        <hr style='border: 1px solid grey;width:20%;margin-left:40%'>
+        <div style='margin-left:35%'>
+            <p style='position:absolute;'>Email : </p>{{ form_widget(form.email_tresorier, { 'attr': {'style': "width:25%;height:1.7em;margin-left:25%"} }) }}
+        </div> #}
         <button class="btn btn-success" style='float:left;margin-left:30%;margin-top:5%'>{{ button_label|default('Valider les modifications') }}</button>
         {{ form_end(form) }}
     <a href="{{ path('accueil') }}" class='btn btn-danger' style='margin-left:3%;margin-top:5%;'>Annuler les modifications</a>

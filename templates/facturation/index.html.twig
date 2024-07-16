@@ -13,7 +13,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Nom</th>
             <th>Actions</th>
         </tr>
@@ -21,7 +20,6 @@
     <tbody id="associationsTableBody">
         {% for association in associations %}
             <tr>
-                <td>{{ association.id }}</td>
                 <td>{{ association.nom }}</td>
                 <td>
                     <a href="{{ path('deposer_facture', { 'id': association.id }) }}" class="btn btn-sm btn-primary">Déposer une Facture</a>
