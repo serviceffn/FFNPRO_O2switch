@@ -1,21 +1,49 @@
+{# templates/facturation/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Facturation{% endblock %}
+{% block title %}Factures{% endblock %}
 
 {% block body %}
+<h1>Gestion des Factures</h1>
 
-    {# TOP #}
-    <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Facturation</h1>
-    <p style='text-align:center'>{{ app.user.nom }}</p>
-    <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
-    <p style='text-align:center;'>Facturation en travaux, ça arrive prochainement... (NON FONCTIONNEL)</p>
-    <a href="{{ path('facturation_mensuel') }}" class='btn btn-primary' style='margin-left:19%;margin-top:5%;'>Facturation Mensuel</a>
-    <a href="{{ path('facturation_annuel_association') }}" class='btn btn-primary' style='margin-left:3%;margin-top:5%;'>Facturation Annuel Associations</a>
-    <a href="{{ path('facturation_annuel_centre') }}" class='btn btn-primary' style='margin-left:3%;margin-top:5%;'>Facturation Annuel Centres</a>
+<div class="input-group mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom d'association...">
+</div>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="associationsTableBody">
+        {% for association in associations %}
+            <tr>
+                <td>{{ association.nom }}</td>
+                <td>
+                    <a href="{{ path('deposer_facture', { 'id': association.id }) }}" class="btn btn-sm btn-primary">Déposer une Facture</a>
+                    <a href="{{ path('show_list_factures', { 'associationId': association.id }) }}" class="btn btn-sm btn-secondary">Voir toutes les Factures</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-    
+<script>
+    // Fonction pour effectuer la recherche à chaque saisie dans l'input
+    document.getElementById('searchInput').addEventListener('input', function() {
+        let searchValue = this.value.trim().toLowerCase();
+        let rows = document.querySelectorAll('#associationsTableBody tr');
 
+        rows.forEach(function(row) {
+            let associationName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            if (associationName.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}
-
-

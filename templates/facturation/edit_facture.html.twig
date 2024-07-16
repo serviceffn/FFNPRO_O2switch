@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le nom de la facture{% endblock %}
+
+{% block body %}
+    <h1>Modifier le nom de la facture</h1>
+
+    {{ form_start(form) }}
+        {{ form_row(form.pdfFilename) }}
+        <button class="btn btn-success">Enregistrer</button>
+    {{ form_end(form) }}
+{% endblock %}

@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Associations;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,7 +17,6 @@ class AssociationsType extends AbstractType
     {
         $builder
             ->add('email')
-            // ->add('roles')
             ->add('password', HiddenType::class,[
                 'data' => '$argon2id$v=19$m=16,t=2,p=1$MEc3YmFjUEE1MkkydjZNMw$T4FOcbw5UMO6quIyoSRfsQ',
             ])
@@ -37,19 +37,32 @@ class AssociationsType extends AbstractType
             ->add('prenom_president')
             ->add('email_president')
             ->add('email_assoc')
+            ->add('email_secretaire_general', null, [
+                'label' => 'Email du Secrétaire Général'
+            ])
+            ->add('email_tresorier', null, [
+                'label' => 'Email du Trésorier'
+            ])
             ->add('telephone_president')
             ->add('telephone_assoc')
-            ->add('is_active', HiddenType::class,[
+            ->add('is_active', HiddenType::class, [
                 'data' => 1,
             ])
             ->add('region')
-                ->add('images', FileType::class,[
-                    'label' => false,
-                    'multiple' => true,
-                    'mapped' => false,
-                    'required' => false
-                ],  array('attr' => array('style' => 'width:10%'))
-            );
+            ->add('images', FileType::class, [
+                'label' => false,
+                'multiple' => true,
+                'mapped' => false,
+                'required' => false
+            ],  array('attr' => array('style' => 'width:10%')))
+            ->add('email_secretaire_general', EmailType::class, [
+                'required' => false,
+                'label' => 'Email du Secrétaire Général'
+            ])
+            ->add('email_tresorier', EmailType::class, [
+                'required' => false,
+                'label' => 'Email du Trésorier'
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

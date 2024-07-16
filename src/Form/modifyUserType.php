@@ -36,6 +36,12 @@ class modifyUserType extends AbstractType
             ->add('nom_presidebt')
             ->add('prenom_president')
             ->add('email_president')
+            ->add('email_secretaire_general', null, [
+                'label' => 'Email du Secrétaire Général'
+            ])
+            ->add('email_tresorier', null, [
+                'label' => 'Email du Trésorier'
+            ])
             ->add('email_assoc', null, array(
                 'required' => false
             ))  
