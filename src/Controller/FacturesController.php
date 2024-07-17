@@ -89,11 +89,16 @@ class FacturesController extends AbstractController
         }
         $email->subject('Nouvelle facture FFN')
             ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
-            Bonjour<br>
+            Bonjour,<br>
             Une nouvelle facture a été déposée dans votre espace FFN PRO. <br><br>
             Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
-            Agréable journée !<br>
-            Fédération Française de Naturisme');
+            Liliana<br>
+            Secrétariat Fédération française de naturisme<br>
+            26 Rue Paul Belmondo<br>
+            75012 PARIS<br>
+            01.48.10.31.00<br>
+            contact@ffn-naturisme.com<br>
+            www.ffn-naturisme.com');
 
         $email->embed(fopen($logoPath, 'r'), 'logo');
 

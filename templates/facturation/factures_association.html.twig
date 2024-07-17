@@ -11,7 +11,6 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Nom</th>
                     <th>Nom du fichier</th>
                     <th>Mis en ligne le</th>
                     <th>Actions</th>
@@ -20,7 +19,6 @@
             <tbody>
                 {% for facture in factures %}
                     <tr>
-                        <td>{{ facture.nom }}</td>
                         <td>{{ facture.pdfFilename }}</td>
                         <td>{{ facture.createdAt|date('d/m/Y') }}</td>
                         <td>
