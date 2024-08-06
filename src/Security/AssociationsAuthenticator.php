@@ -98,7 +98,7 @@ class AssociationsAuthenticator extends AbstractFormLoginAuthenticator implement
         return new RedirectResponse($this->urlGenerator->generate('accueil'));
         // throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
     }
-
+    
     protected function getLoginUrl()
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
