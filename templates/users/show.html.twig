@@ -30,7 +30,7 @@
     <p style='font-size:70%;text-align:center'>Email : <b>{{ user.email }}</b></p>
 
 <div style="display: flex; justify-content: center; align-items: center;">
-    <a href="{{ path('users_edit', {'id': user.id}) }}" class='btn btn-success' style='margin: 3%;'>Modifier les informations</a>
+    {# <a href="{{ path('users_edit', {'id': user.id}) }}" class='btn btn-success' style='margin: 3%;'>Modifier les informations</a> #}
     {% if user.nLicence|slice(0, 4) != "now"|date("Y") %}
        <a href="{{ path('choice_renouvellement', {'id': user.id}) }}">
     {% endif %}
