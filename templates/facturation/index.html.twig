@@ -5,6 +5,11 @@
 
 {% block body %}
 <h1>Gestion des Factures</h1>
+    {% if notificationFacture %}
+        <div class="alert alert-info">
+            <strong>Notification :</strong> Une nouvelle facture a été déposée. Cliquez <a href="{{ path('factures_association', {'id': app.user.id}) }}">ici</a> pour voir.
+        </div>
+    {% endif %}
 
 <div class="input-group mb-3">
     <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom d'association...">
