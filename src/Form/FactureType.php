@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -19,17 +20,23 @@ class FactureType extends AbstractType
 
         $builder
             ->add('pdfContent', FileType::class, [
-                'label' => 'Fichier PDF',
+                'label' => 'Fichiers PDF',
                 'mapped' => false,
                 'required' => $isDeposerAction,
+                'multiple' => true, // Autorise l'upload multiple
                 'constraints' => [
-                    new File([
-                        'mimeTypes' => [
-                            'application/pdf',
+                    new All([ // Applique la contrainte à chaque élément du tableau
+                        'constraints' => [
+                            new File([
+                                'maxSize' => '1024k',
+                                'mimeTypes' => [
+                                    'application/pdf',
+                                    'application/x-pdf',
+                                ],
+                                'mimeTypesMessage' => 'Veuillez télécharger des documents PDF valides',
+                            ]),
                         ],
-                        'mimeTypesMessage' => 'Veuillez télécharger un document PDF valide',
                     ]),
-
                 ],
             ])
             ->add('pdfFilename', TextType::class, [

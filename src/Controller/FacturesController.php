@@ -38,46 +38,59 @@ class FacturesController extends AbstractController
      */
     public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
-        $facture = new Facture();
-        $facture->setAssociationId($association->getId());
-        $facture->setCreatedAt(new \DateTime());
-        $facture->setUpdatedAt(new \DateTime());
-
-        $facture->setNotification(true);
-        $facture->setNotificationEndDate((new \DateTime())->modify('+2 weeks'));
-
-        $form = $this->createForm(FactureType::class, $facture, [
+        $form = $this->createForm(FactureType::class, null, [
             'is_deposer_action' => true
         ]);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
-            $pdfFile = $form->get('pdfContent')->getData();
-            if ($pdfFile) {
-                try {
-                    $pdfContent = file_get_contents($pdfFile->getPathname());
-                    $facture->setPdfContent($pdfContent);
-                    $facture->setPdfFilename($form->get('pdfFilename')->getData()); // Enregistrer le nom du fichier PDF
-                } catch (\Exception $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors du traitement du fichier PDF.');
-                    return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
+            // Récupérer les fichiers PDF
+            $pdfFiles = $form->get('pdfContent')->getData();
+    
+            if ($pdfFiles) {
+                foreach ($pdfFiles as $pdfFile) {
+                    try {
+                        // Créer une nouvelle facture pour chaque fichier
+                        $facture = new Facture();
+                        $facture->setAssociationId($association->getId());
+                        $facture->setCreatedAt(new \DateTime());
+                        $facture->setUpdatedAt(new \DateTime());
+    
+                        $facture->setNotification(true);
+                        $facture->setNotificationEndDate((new \DateTime())->modify('+2 weeks'));
+    
+                        // Lire et enregistrer chaque fichier PDF
+                        $pdfContent = file_get_contents($pdfFile->getPathname());
+                        $facture->setPdfContent($pdfContent);
+                        $facture->setPdfFilename($pdfFile->getClientOriginalName()); // Enregistrer le nom original du fichier
+    
+                        // Persist la facture pour chaque fichier
+                        $entityManager->persist($facture);
+    
+                    } catch (\Exception $e) {
+                        $this->addFlash('error', 'Une erreur est survenue lors du traitement du fichier PDF.');
+                        return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
+                    }
                 }
+    
+                // Flush toutes les factures après avoir persisté chacune
+                $entityManager->flush();
+    
+                // Envoyer des notifications par e-mail (si nécessaire)
+                $this->sendEmailNotification($mailer, $association, $facture);
+    
+                $this->addFlash('success', 'Les factures ont été déposées avec succès.');
+                return $this->redirectToRoute('factures_index');
             }
-
-            $entityManager->persist($facture);
-            $entityManager->flush();
-
-            $this->sendEmailNotification($mailer, $association, $facture);
-
-            $this->addFlash('success', 'La facture a été déposée avec succès.');
-            return $this->redirectToRoute('factures_index');
         }
-
+    
         return $this->render('facturation/deposer_facture.html.twig', [
             'form' => $form->createView(),
             'association' => $association,
         ]);
     }
+    
+    
 
     private function sendEmailNotification(MailerInterface $mailer, Associations $association, Facture $facture)
     {

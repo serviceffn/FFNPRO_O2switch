@@ -7,7 +7,8 @@
         <h1>Déposer une Facture pour {{ association.nom }}</h1>
         {{ form_start(form, { 'attr': {'class': 'form-horizontal'} }) }}
             <div class="form-group">
-                {{ form_row(form.pdfContent, { 'attr': {'class': 'form-control-file'} }) }}
+                {# Ajout de l'attribut 'multiple' et adaptation du 'name' pour les fichiers multiples #}
+                {{ form_widget(form.pdfContent, { 'attr': {'class': 'form-control-file', 'multiple': 'multiple', 'name': 'pdfContent[]'} }) }}
             </div>
             <div class="form-group">
                 {{ form_row(form.pdfFilename, { 'attr': {'class': 'form-control'} }) }}
