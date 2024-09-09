@@ -53,6 +53,17 @@ class Facture
      */
     private $pdfFilename;
 
+
+    /**
+     * @ORM\Column(type="boolean", options={"default":false})
+     */
+    private $notification = false;
+
+    /**
+     * @ORM\Column(name="notificationEndDate", type="datetime", nullable=true)
+     */
+    private $notificationEndDate;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -143,5 +154,29 @@ class Facture
         return $this;
     }
 
+
+    public function getNotification(): ?bool
+    {
+        return $this->notification;
+    }
+
+    public function setNotification(bool $notification): self
+    {
+        $this->notification = $notification;
+
+        return $this;
+    }
+
+    public function getNotificationEndDate(): ?\DateTimeInterface
+    {
+        return $this->notificationEndDate;
+    }
+
+    public function setNotificationEndDate(?\DateTimeInterface $notificationEndDate): self
+    {
+        $this->notificationEndDate = $notificationEndDate;
+
+        return $this;
+    }
     
 }

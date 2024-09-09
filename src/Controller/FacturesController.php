@@ -19,13 +19,17 @@ class FacturesController extends AbstractController
     /**
      * @Route("/factures", name="factures_index")
      */
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
         // Récupérer la liste des associations depuis la base de données
         $associations = $this->getDoctrine()->getRepository(Associations::class)->findAll();
 
+        $notificationFacture = $this->checkNotification($entityManager);
+
+
         return $this->render('facturation/index.html.twig', [
             'associations' => $associations,
+            'notificationFacture' => $notificationFacture,
         ]);
     }
 
@@ -38,6 +42,9 @@ class FacturesController extends AbstractController
         $facture->setAssociationId($association->getId());
         $facture->setCreatedAt(new \DateTime());
         $facture->setUpdatedAt(new \DateTime());
+
+        $facture->setNotification(true);
+        $facture->setNotificationEndDate((new \DateTime())->modify('+2 weeks'));
 
         $form = $this->createForm(FactureType::class, $facture, [
             'is_deposer_action' => true
@@ -201,5 +208,22 @@ class FacturesController extends AbstractController
             'association' => $association,
         ]);
     }
+
+    public function checkNotification(EntityManagerInterface $entityManager): ?Facture
+{
+    $userId = $this->getUser()->getId();
+    $factureRepository = $entityManager->getRepository(Facture::class);
+
+    $factures = $factureRepository->findBy(['associationId' => $userId, 'notification' => true]);
+
+    foreach ($factures as $facture) {
+        $notificationEndDate = $facture->getNotificationEndDate();
+        if ($notificationEndDate && $notificationEndDate > new \DateTime()) {
+            return $facture;
+        }
+    }
+
+    return null;
+}
 
 }
