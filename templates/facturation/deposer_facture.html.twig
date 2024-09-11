@@ -9,7 +9,7 @@
             {# Champ CSRF #}
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('deposer_facture') }}">
 
-            <div class="form-group" id="pdfInputContainer">
+            <div class="form-group">
                 <label for="pdfInput">Sélectionner des fichiers PDF :</label>
                 <input type="file" name="pdfContent[]" class="form-control-file" id="pdfInput" multiple>
                 <small class="form-text text-muted" id="fileCount"></small>
@@ -59,11 +59,12 @@
                                     return function(e) {
                                         var previewItem = document.createElement('div');
                                         previewItem.classList.add('file-preview-item');
+                                        previewItem.style.marginBottom = '20px';  // Ajouter un espace entre les aperçus
 
                                         var iframe = document.createElement('iframe');
                                         iframe.src = e.target.result;
                                         iframe.style.width = "100%";
-                                        iframe.style.height = "200px";
+                                        iframe.style.height = "600px";  // Augmenter la hauteur de l'aperçu
 
                                         previewItem.appendChild(iframe);
                                         filePreview.appendChild(previewItem);
