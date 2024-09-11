@@ -48,7 +48,6 @@ public function deposerFacture(Request $request, Associations $association, Enti
 
         // Récupérer les fichiers téléchargés
         $pdfFiles = $request->files->get('pdfContent', []);
-        // Récupérer le nom du fichier
         $pdfFilename = $request->request->get('pdfFilename');
 
         if ($pdfFiles && is_array($pdfFiles)) {
@@ -75,7 +74,6 @@ public function deposerFacture(Request $request, Associations $association, Enti
 
                     // Définir le nom du fichier
                     if (!empty($pdfFilename)) {
-                        // Si plusieurs fichiers sont téléchargés, vous pouvez ajuster le nom en conséquence
                         $filename = $pdfFilename . '_' . $pdfFile->getClientOriginalName();
                     } else {
                         $filename = $pdfFile->getClientOriginalName();
@@ -94,10 +92,8 @@ public function deposerFacture(Request $request, Associations $association, Enti
             // Sauvegarder toutes les factures en base de données
             $entityManager->flush();
 
-            // Envoyer les notifications par e-mail pour chaque facture créée
-            foreach ($createdFactures as $facture) {
-                $this->sendEmailNotification($mailer, $association, $facture);
-            }
+            // Envoyer un seul e-mail avec toutes les factures en pièces jointes
+            $this->sendEmailNotification($mailer, $association, $createdFactures);
 
             $this->addFlash('success', 'Les factures ont été déposées avec succès.');
             return $this->redirectToRoute('factures_index');
@@ -113,51 +109,54 @@ public function deposerFacture(Request $request, Associations $association, Enti
     ]);
 }
 
-    private function sendEmailNotification(MailerInterface $mailer, Associations $association, Facture $facture)
-    {
-        $logoPath = '../public/uploads/94.png';
 
-        $email = (new Email())
-            ->from('no.reply.naturisme@gmail.com')
-            ->to($association->getEmailPresident());
+private function sendEmailNotification(MailerInterface $mailer, Associations $association, array $factures)
+{
+    $logoPath = '../public/uploads/94.png';
 
-        if ($association->getEmailSecretaireGeneral()) {
-            $email->addTo($association->getEmailSecretaireGeneral());
-        }
+    $email = (new Email())
+        ->from('no.reply.naturisme@gmail.com')
+        ->to($association->getEmailPresident());
 
-        if ($association->getEmailTresorier()) {
-            $email->addTo($association->getEmailTresorier());
-        }
-        $email->subject('Nouvelle facture FFN')
-            ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
-            Bonjour,<br>
-            Une nouvelle facture a été déposée dans votre espace FFN PRO. <br><br>
-            Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
-            Liliana<br>
-            Secrétariat Fédération française de naturisme<br>
-            26 Rue Paul Belmondo<br>
-            75012 PARIS<br>
-            01.48.10.31.00<br>
-            contact@ffn-naturisme.com<br>
-            www.ffn-naturisme.com');
+    if ($association->getEmailSecretaireGeneral()) {
+        $email->addTo($association->getEmailSecretaireGeneral());
+    }
 
-        $email->embed(fopen($logoPath, 'r'), 'logo');
+    if ($association->getEmailTresorier()) {
+        $email->addTo($association->getEmailTresorier());
+    }
 
+    $email->subject('Nouvelle facture FFN')
+        ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
+        Bonjour,<br>
+        Une ou plusieurs nouvelles factures ont été déposées dans votre espace FFN PRO. <br><br>
+        Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
+        Liliana<br>
+        Secrétariat Fédération française de naturisme<br>
+        26 Rue Paul Belmondo<br>
+        75012 PARIS<br>
+        01.48.10.31.00<br>
+        contact@ffn-naturisme.com<br>
+        www.ffn-naturisme.com');
 
+    // Ajout de l'image du logo
+    $email->embed(fopen($logoPath, 'r'), 'logo');
+
+    // Ajout de toutes les factures en tant que pièces jointes
+    foreach ($factures as $facture) {
         $pdfContent = $facture->getPdfContent();
         $pdfFilename = $facture->getPdfFilename();
 
         if ($pdfContent && $pdfFilename) {
             $email->attach($pdfContent, $pdfFilename, 'application/pdf');
         } else {
-            // Gérer le cas où le contenu PDF ou le nom de fichier est manquant
             throw new \Exception('PDF content or filename is missing.');
         }
-
-        // Envoi de l'email
-        $mailer->send($email);
     }
 
+    // Envoi de l'e-mail
+    $mailer->send($email);
+}
 
 
     /**
