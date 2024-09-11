@@ -22,7 +22,9 @@ class FacturesController extends AbstractController
     public function index(EntityManagerInterface $entityManager): Response
     {
         // Récupérer la liste des associations depuis la base de données
-        $associations = $this->getDoctrine()->getRepository(Associations::class)->findAll();
+        // $associations = $this->getDoctrine()->getRepository(Associations::class)->findAll();
+        $associations = $entityManager->getRepository(Associations::class)->findBy([], ['nom' => 'ASC']);
+
 
         $notificationFacture = $this->checkNotification($entityManager);
 
