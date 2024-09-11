@@ -5,14 +5,88 @@
 {% block body %}
     <div class="container">
         <h1>Déposer une Facture pour {{ association.nom }}</h1>
-        {{ form_start(form, { 'attr': {'class': 'form-horizontal'} }) }}
+        <form action="{{ path('deposer_facture', {id: association.id}) }}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+            {# Champ CSRF #}
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('deposer_facture') }}">
+
             <div class="form-group">
-                {{ form_row(form.pdfContent, { 'attr': {'class': 'form-control-file'} }) }}
+                <label for="pdfInput">Sélectionner des fichiers PDF :</label>
+                <input type="file" name="pdfContent[]" class="form-control-file" id="pdfInput" multiple>
+                <small class="form-text text-muted" id="fileCount"></small>
             </div>
-            <div class="form-group">
-                {{ form_row(form.pdfFilename, { 'attr': {'class': 'form-control'} }) }}
+
+            <div id="filePreviewContainer" style="display:none;">
+                <h5>Aperçu des fichiers :</h5>
+                <div id="filePreview"></div>
             </div>
+
             <button type="submit" class="btn btn-primary">Envoyer</button>
-        {{ form_end(form) }}
+        </form>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var pdfInput = document.getElementById('pdfInput');
+            var fileCount = document.getElementById('fileCount');
+            var filePreviewContainer = document.getElementById('filePreviewContainer');
+            var filePreview = document.getElementById('filePreview');
+
+            // Cacher le compteur de fichiers et l'aperçu par défaut
+            fileCount.style.display = 'none';
+            filePreviewContainer.style.display = 'none';
+
+            if (pdfInput) {
+                pdfInput.addEventListener('change', function() {
+                    var files = pdfInput.files;
+                    var numberOfFiles = files.length;
+
+                    if (numberOfFiles > 0) {
+                        // Afficher le nombre de fichiers sélectionnés
+                        fileCount.textContent = numberOfFiles + ' fichier(s) sélectionné(s).';
+                        fileCount.style.display = 'block';  // Afficher le texte
+                        filePreviewContainer.style.display = 'block';  // Afficher l'aperçu des fichiers
+                        filePreview.innerHTML = '';  // Vider le conteneur de l'aperçu
+
+                        for (var i = 0; i < numberOfFiles; i++) {
+                            var file = files[i];
+
+                            if (file.type === 'application/pdf') {
+                                var reader = new FileReader();
+
+                                reader.onload = (function(file) {
+                                    return function(e) {
+                                        console.log('Aperçu pour :', file.name);
+                                        var previewItem = document.createElement('div');
+                                        previewItem.classList.add('file-preview-item');
+                                        previewItem.style.marginBottom = '20px';  // Ajouter un espace entre les aperçus
+
+                                        var iframe = document.createElement('iframe');
+                                        iframe.src = e.target.result;
+                                        iframe.style.width = "100%";
+                                        iframe.style.height = "600px";  // Augmenter la hauteur de l'aperçu
+
+                                        previewItem.appendChild(iframe);
+                                        filePreview.appendChild(previewItem);
+                                    };
+                                })(file);
+
+                                reader.readAsDataURL(file);
+                            } else {
+                                var previewItem = document.createElement('div');
+                                previewItem.classList.add('file-preview-item');
+                                previewItem.textContent = file.name + ' (non pris en charge pour l’aperçu)';
+                                filePreview.appendChild(previewItem);
+                            }
+                        }
+                    } else {
+                        // Si aucun fichier n'est sélectionné, cacher le texte et l'aperçu
+                        fileCount.style.display = 'none';
+                        filePreviewContainer.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

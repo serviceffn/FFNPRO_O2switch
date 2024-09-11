@@ -19,104 +19,144 @@ class FacturesController extends AbstractController
     /**
      * @Route("/factures", name="factures_index")
      */
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
         // Récupérer la liste des associations depuis la base de données
         $associations = $this->getDoctrine()->getRepository(Associations::class)->findAll();
 
+        $notificationFacture = $this->checkNotification($entityManager);
+
+
         return $this->render('facturation/index.html.twig', [
             'associations' => $associations,
+            'notificationFacture' => $notificationFacture,
         ]);
     }
 
-    /**
-     * @Route("/factures/deposer/{id}", name="deposer_facture")
-     */
-    public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
-    {
-        $facture = new Facture();
-        $facture->setAssociationId($association->getId());
-        $facture->setCreatedAt(new \DateTime());
-        $facture->setUpdatedAt(new \DateTime());
+/**
+ * @Route("/factures/deposer/{id}", name="deposer_facture", methods={"GET", "POST"})
+ */
+public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+{
+    if ($request->isMethod('POST')) {
+        // Vérifier le jeton CSRF
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->isCsrfTokenValid('deposer_facture', $csrfToken)) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
+        }
 
-        $form = $this->createForm(FactureType::class, $facture, [
-            'is_deposer_action' => true
-        ]);
-        $form->handleRequest($request);
+        // Récupérer les fichiers téléchargés
+        $pdfFiles = $request->files->get('pdfContent', []);
+        $pdfFilename = $request->request->get('pdfFilename');
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $pdfFile = $form->get('pdfContent')->getData();
-            if ($pdfFile) {
+        if ($pdfFiles && is_array($pdfFiles)) {
+            $createdFactures = [];
+
+            foreach ($pdfFiles as $pdfFile) {
                 try {
+                    // Vérifier que le fichier est bien un PDF
+                    if ($pdfFile->getClientMimeType() !== 'application/pdf') {
+                        throw new \Exception('Le fichier ' . $pdfFile->getClientOriginalName() . ' n\'est pas un PDF valide.');
+                    }
+
+                    // Créer une nouvelle entité Facture
+                    $facture = new Facture();
+                    $facture->setAssociationId($association->getId());
+                    $facture->setCreatedAt(new \DateTime());
+                    $facture->setUpdatedAt(new \DateTime());
+                    $facture->setNotification(true);
+                    $facture->setNotificationEndDate((new \DateTime())->modify('+2 weeks'));
+
+                    // Lire le contenu du fichier PDF
                     $pdfContent = file_get_contents($pdfFile->getPathname());
                     $facture->setPdfContent($pdfContent);
-                    $facture->setPdfFilename($form->get('pdfFilename')->getData()); // Enregistrer le nom du fichier PDF
+
+                    // Définir le nom du fichier
+                    if (!empty($pdfFilename)) {
+                        $filename = $pdfFilename . '_' . $pdfFile->getClientOriginalName();
+                    } else {
+                        $filename = $pdfFile->getClientOriginalName();
+                    }
+                    $facture->setPdfFilename($filename);
+
+                    // Persister l'entité
+                    $entityManager->persist($facture);
+                    $createdFactures[] = $facture;
                 } catch (\Exception $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors du traitement du fichier PDF.');
+                    $this->addFlash('error', 'Erreur lors du traitement du fichier PDF : ' . $e->getMessage());
                     return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
                 }
             }
 
-            $entityManager->persist($facture);
+            // Sauvegarder toutes les factures en base de données
             $entityManager->flush();
 
-            $this->sendEmailNotification($mailer, $association, $facture);
+            // Envoyer un seul e-mail avec toutes les factures en pièces jointes
+            $this->sendEmailNotification($mailer, $association, $createdFactures);
 
-            $this->addFlash('success', 'La facture a été déposée avec succès.');
+            $this->addFlash('success', 'Les factures ont été déposées avec succès.');
             return $this->redirectToRoute('factures_index');
+        } else {
+            $this->addFlash('error', 'Aucun fichier PDF n\'a été téléchargé.');
+            return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
         }
-
-        return $this->render('facturation/deposer_facture.html.twig', [
-            'form' => $form->createView(),
-            'association' => $association,
-        ]);
     }
 
-    private function sendEmailNotification(MailerInterface $mailer, Associations $association, Facture $facture)
-    {
-        $logoPath = '../public/uploads/94.png';
-
-        $email = (new Email())
-            ->from('no.reply.naturisme@gmail.com')
-            ->to($association->getEmailPresident());
-
-        if ($association->getEmailSecretaireGeneral()) {
-            $email->addTo($association->getEmailSecretaireGeneral());
-        }
-
-        if ($association->getEmailTresorier()) {
-            $email->addTo($association->getEmailTresorier());
-        }
-        $email->subject('Nouvelle facture FFN')
-            ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
-            Bonjour,<br>
-            Une nouvelle facture a été déposée dans votre espace FFN PRO. <br><br>
-            Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
-            Liliana<br>
-            Secrétariat Fédération française de naturisme<br>
-            26 Rue Paul Belmondo<br>
-            75012 PARIS<br>
-            01.48.10.31.00<br>
-            contact@ffn-naturisme.com<br>
-            www.ffn-naturisme.com');
-
-        $email->embed(fopen($logoPath, 'r'), 'logo');
+    // Afficher le formulaire si la méthode n'est pas POST
+    return $this->render('facturation/deposer_facture.html.twig', [
+        'association' => $association,
+    ]);
+}
 
 
+private function sendEmailNotification(MailerInterface $mailer, Associations $association, array $factures)
+{
+    $logoPath = '../public/uploads/94.png';
+
+    $email = (new Email())
+        ->from('no.reply.naturisme@gmail.com')
+        ->to($association->getEmailPresident());
+
+    if ($association->getEmailSecretaireGeneral()) {
+        $email->addTo($association->getEmailSecretaireGeneral());
+    }
+
+    if ($association->getEmailTresorier()) {
+        $email->addTo($association->getEmailTresorier());
+    }
+
+    $email->subject('Nouvelle facture FFN')
+        ->html('<img src="cid:logo" alt="Logo FFN PRO"><br>
+        Bonjour,<br>
+        Une ou plusieurs nouvelles factures ont été déposées dans votre espace FFN PRO. <br><br>
+        Cliquez <a href="https://ffnpro.net">ici</a> pour accéder à votre espace FFN. <br><br>
+        Liliana<br>
+        Secrétariat Fédération française de naturisme<br>
+        26 Rue Paul Belmondo<br>
+        75012 PARIS<br>
+        01.48.10.31.00<br>
+        contact@ffn-naturisme.com<br>
+        www.ffn-naturisme.com');
+
+    // Ajout de l'image du logo
+    $email->embed(fopen($logoPath, 'r'), 'logo');
+
+    // Ajout de toutes les factures en tant que pièces jointes
+    foreach ($factures as $facture) {
         $pdfContent = $facture->getPdfContent();
         $pdfFilename = $facture->getPdfFilename();
 
         if ($pdfContent && $pdfFilename) {
             $email->attach($pdfContent, $pdfFilename, 'application/pdf');
         } else {
-            // Gérer le cas où le contenu PDF ou le nom de fichier est manquant
             throw new \Exception('PDF content or filename is missing.');
         }
-
-        // Envoi de l'email
-        $mailer->send($email);
     }
 
+    // Envoi de l'e-mail
+    $mailer->send($email);
+}
 
 
     /**
@@ -201,5 +241,22 @@ class FacturesController extends AbstractController
             'association' => $association,
         ]);
     }
+
+    public function checkNotification(EntityManagerInterface $entityManager): ?Facture
+{
+    $userId = $this->getUser()->getId();
+    $factureRepository = $entityManager->getRepository(Facture::class);
+
+    $factures = $factureRepository->findBy(['associationId' => $userId, 'notification' => true]);
+
+    foreach ($factures as $facture) {
+        $notificationEndDate = $facture->getNotificationEndDate();
+        if ($notificationEndDate && $notificationEndDate > new \DateTime()) {
+            return $facture;
+        }
+    }
+
+    return null;
+}
 
 }

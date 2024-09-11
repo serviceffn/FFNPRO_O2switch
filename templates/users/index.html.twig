@@ -114,7 +114,7 @@
                     {% endif %}
                     <td>
                         <a href="{{ path('users_show', {'id': centre.id}) }}">Voir </a>
-                        {# <a href="{{ path('users_edit', {'id': centre.id}) }}">Modifier</a> #}
+                        <a href="{{ path('users_edit', {'id': centre.id}) }}">Modifier</a>
                         {% if centre.n_licence|split('-', 4)|first == "now"|date("Y")  %}
                         {% else %}
                             <a href="{{ path('choice_renouvellement', {'id': centre.id}) }}"> | Renouveler </a>
