@@ -16,9 +16,8 @@
         </div>
     {% endif %}
 
-<div class="input-group mb-3">
-    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom d'association...">
-</div>
+    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Rechercher une association...">
+
 
 <table class="table">
     <thead>
@@ -40,20 +39,20 @@
     </tbody>
 </table>
 
-<script>
-    // Fonction pour effectuer la recherche à chaque saisie dans l'input
-    document.getElementById('searchInput').addEventListener('input', function() {
-        let searchValue = this.value.trim().toLowerCase();
-        let rows = document.querySelectorAll('#associationsTableBody tr');
+  <script>
+        // Fonction pour effectuer la recherche à chaque saisie dans l'input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            let searchValue = this.value.trim().toLowerCase();
+            let rows = document.querySelectorAll('#associationsTableBody tr');
 
-        rows.forEach(function(row) {
-            let associationName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            if (associationName.includes(searchValue)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+            rows.forEach(function(row) {
+                let associationName = row.querySelector('td:nth-child(1)').textContent.toLowerCase(); // Correction ici : `td:nth-child(1)`
+                if (associationName.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
-    });
-</script>
+    </script>
 {% endblock %}
