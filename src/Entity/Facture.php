@@ -53,7 +53,6 @@ class Facture
      */
     private $pdfFilename;
 
-
     /**
      * @ORM\Column(type="boolean", options={"default":false})
      */
@@ -63,6 +62,12 @@ class Facture
      * @ORM\Column(name="notificationEndDate", type="datetime", nullable=true)
      */
     private $notificationEndDate;
+
+    public function __construct()
+    {
+        $parisTimeZone = new \DateTimeZone('Europe/Paris');
+        $this->createdAt = new \DateTime('now', $parisTimeZone);
+    }
 
     public function getId(): ?int
     {
@@ -124,7 +129,8 @@ class Facture
 
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
-        $this->updatedAt = $updatedAt;
+        $parisTimeZone = new \DateTimeZone('Europe/Paris');
+        $this->updatedAt = $updatedAt ? $updatedAt->setTimezone($parisTimeZone) : new \DateTime('now', $parisTimeZone);
 
         return $this;
     }
@@ -141,7 +147,6 @@ class Facture
         return $this;
     }
 
-
     public function getPdfFilename(): ?string
     {
         return $this->pdfFilename;
@@ -153,7 +158,6 @@ class Facture
 
         return $this;
     }
-
 
     public function getNotification(): ?bool
     {
@@ -178,5 +182,4 @@ class Facture
 
         return $this;
     }
-    
 }

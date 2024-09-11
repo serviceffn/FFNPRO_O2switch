@@ -5,15 +5,80 @@
 {% block body %}
     <div class="container">
         <h1>Déposer une Facture pour {{ association.nom }}</h1>
-        {{ form_start(form, { 'attr': {'class': 'form-horizontal'} }) }}
-            <div class="form-group">
-                {# Ajout de l'attribut 'multiple' et adaptation du 'name' pour les fichiers multiples #}
-                {{ form_widget(form.pdfContent, { 'attr': {'class': 'form-control-file', 'multiple': 'multiple', 'name': 'pdfContent[]'} }) }}
+
+        <form action="{{ path('deposer_facture', {id: association.id}) }}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+            {# Champ CSRF #}
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('deposer_facture') }}">
+
+            <div class="form-group" id="pdfInput">
+                <label for="pdfInput">Sélectionner des fichiers PDF :</label>
+                <input type="file" name="pdfContent[]" class="form-control-file" id="pdfInput" multiple>
+                <small class="form-text text-muted" id="fileCount">Aucun fichier sélectionné.</small>
             </div>
-            <div class="form-group">
-                {{ form_row(form.pdfFilename, { 'attr': {'class': 'form-control'} }) }}
+
+            <div class="form-group" id="filePreviewContainer" style="display: none;">
+                <label>Aperçu des fichiers sélectionnés :</label>
+                <div id="filePreview" class="file-previews"></div>
             </div>
+
             <button type="submit" class="btn btn-primary">Envoyer</button>
-        {{ form_end(form) }}
+        </form>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var pdfInput = document.getElementById('pdfInput');
+            var fileCount = document.getElementById('fileCount');
+            var filePreviewContainer = document.getElementById('filePreviewContainer');
+            var filePreview = document.getElementById('filePreview');
+
+            if (pdfInput) {
+                pdfInput.addEventListener('change', function() {
+                    var files = pdfInput.files;
+                    var numberOfFiles = files.length;
+
+                    if (numberOfFiles > 0) {
+                        fileCount.textContent = numberOfFiles + ' fichier(s) sélectionné(s).';
+                        filePreviewContainer.style.display = 'block';
+                        filePreview.innerHTML = '';
+
+                        for (var i = 0; i < numberOfFiles; i++) {
+                            var file = files[i];
+
+                            if (file.type === 'application/pdf') {
+                                var reader = new FileReader();
+
+                                reader.onload = (function(file) {
+                                    return function(e) {
+                                        var previewItem = document.createElement('div');
+                                        previewItem.classList.add('file-preview-item');
+
+                                        var iframe = document.createElement('iframe');
+                                        iframe.src = e.target.result;
+                                        iframe.style.width = "100%";
+                                        iframe.style.height = "200px";
+
+                                        previewItem.appendChild(iframe);
+                                        filePreview.appendChild(previewItem);
+                                    };
+                                })(file);
+
+                                reader.readAsDataURL(file);
+                            } else {
+                                var previewItem = document.createElement('div');
+                                previewItem.classList.add('file-preview-item');
+                                previewItem.textContent = file.name + ' (non pris en charge pour l’aperçu)';
+                                filePreview.appendChild(previewItem);
+                            }
+                        }
+                    } else {
+                        fileCount.textContent = 'Aucun fichier sélectionné.';
+                        filePreviewContainer.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

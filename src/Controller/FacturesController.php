@@ -33,64 +33,85 @@ class FacturesController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/factures/deposer/{id}", name="deposer_facture")
-     */
-    public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
-    {
-        $form = $this->createForm(FactureType::class, null, [
-            'is_deposer_action' => true
-        ]);
-        $form->handleRequest($request);
-    
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Récupérer les fichiers PDF
-            $pdfFiles = $form->get('pdfContent')->getData();
-    
-            if ($pdfFiles) {
-                foreach ($pdfFiles as $pdfFile) {
-                    try {
-                        // Créer une nouvelle facture pour chaque fichier
-                        $facture = new Facture();
-                        $facture->setAssociationId($association->getId());
-                        $facture->setCreatedAt(new \DateTime());
-                        $facture->setUpdatedAt(new \DateTime());
-    
-                        $facture->setNotification(true);
-                        $facture->setNotificationEndDate((new \DateTime())->modify('+2 weeks'));
-    
-                        // Lire et enregistrer chaque fichier PDF
-                        $pdfContent = file_get_contents($pdfFile->getPathname());
-                        $facture->setPdfContent($pdfContent);
-                        $facture->setPdfFilename($pdfFile->getClientOriginalName()); // Enregistrer le nom original du fichier
-    
-                        // Persist la facture pour chaque fichier
-                        $entityManager->persist($facture);
-    
-                    } catch (\Exception $e) {
-                        $this->addFlash('error', 'Une erreur est survenue lors du traitement du fichier PDF.');
-                        return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
-                    }
-                }
-    
-                // Flush toutes les factures après avoir persisté chacune
-                $entityManager->flush();
-    
-                // Envoyer des notifications par e-mail (si nécessaire)
-                $this->sendEmailNotification($mailer, $association, $facture);
-    
-                $this->addFlash('success', 'Les factures ont été déposées avec succès.');
-                return $this->redirectToRoute('factures_index');
-            }
+/**
+ * @Route("/factures/deposer/{id}", name="deposer_facture", methods={"GET", "POST"})
+ */
+public function deposerFacture(Request $request, Associations $association, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+{
+    if ($request->isMethod('POST')) {
+        // Vérifier le jeton CSRF
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->isCsrfTokenValid('deposer_facture', $csrfToken)) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
         }
-    
-        return $this->render('facturation/deposer_facture.html.twig', [
-            'form' => $form->createView(),
-            'association' => $association,
-        ]);
+
+        // Récupérer les fichiers téléchargés
+        $pdfFiles = $request->files->get('pdfContent', []);
+        // Récupérer le nom du fichier
+        $pdfFilename = $request->request->get('pdfFilename');
+
+        if ($pdfFiles && is_array($pdfFiles)) {
+            $createdFactures = [];
+
+            foreach ($pdfFiles as $pdfFile) {
+                try {
+                    // Vérifier que le fichier est bien un PDF
+                    if ($pdfFile->getClientMimeType() !== 'application/pdf') {
+                        throw new \Exception('Le fichier ' . $pdfFile->getClientOriginalName() . ' n\'est pas un PDF valide.');
+                    }
+
+                    // Créer une nouvelle entité Facture
+                    $facture = new Facture();
+                    $facture->setAssociationId($association->getId());
+                    $facture->setCreatedAt(new \DateTime());
+                    $facture->setUpdatedAt(new \DateTime());
+                    $facture->setNotification(true);
+                    $facture->setNotificationEndDate((new \DateTime())->modify('+2 weeks'));
+
+                    // Lire le contenu du fichier PDF
+                    $pdfContent = file_get_contents($pdfFile->getPathname());
+                    $facture->setPdfContent($pdfContent);
+
+                    // Définir le nom du fichier
+                    if (!empty($pdfFilename)) {
+                        // Si plusieurs fichiers sont téléchargés, vous pouvez ajuster le nom en conséquence
+                        $filename = $pdfFilename . '_' . $pdfFile->getClientOriginalName();
+                    } else {
+                        $filename = $pdfFile->getClientOriginalName();
+                    }
+                    $facture->setPdfFilename($filename);
+
+                    // Persister l'entité
+                    $entityManager->persist($facture);
+                    $createdFactures[] = $facture;
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Erreur lors du traitement du fichier PDF : ' . $e->getMessage());
+                    return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
+                }
+            }
+
+            // Sauvegarder toutes les factures en base de données
+            $entityManager->flush();
+
+            // Envoyer les notifications par e-mail pour chaque facture créée
+            foreach ($createdFactures as $facture) {
+                $this->sendEmailNotification($mailer, $association, $facture);
+            }
+
+            $this->addFlash('success', 'Les factures ont été déposées avec succès.');
+            return $this->redirectToRoute('factures_index');
+        } else {
+            $this->addFlash('error', 'Aucun fichier PDF n\'a été téléchargé.');
+            return $this->redirectToRoute('deposer_facture', ['id' => $association->getId()]);
+        }
     }
-    
-    
+
+    // Afficher le formulaire si la méthode n'est pas POST
+    return $this->render('facturation/deposer_facture.html.twig', [
+        'association' => $association,
+    ]);
+}
 
     private function sendEmailNotification(MailerInterface $mailer, Associations $association, Facture $facture)
     {
