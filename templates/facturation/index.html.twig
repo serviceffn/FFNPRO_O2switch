@@ -1,9 +1,14 @@
-{# templates/facturation/index.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Factures{% endblock %}
 
 {% block body %}
+ {% set messages = app.flashes('success') %}
+    {% if messages|length > 0 %}
+        <div class="alert alert-success">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
 <h1>Gestion des Factures</h1>
     {% if notificationFacture %}
         <div class="alert alert-info">

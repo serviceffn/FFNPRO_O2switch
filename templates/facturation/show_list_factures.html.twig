@@ -1,9 +1,13 @@
-{# templates/facturation/show_list_factures.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Liste des Factures{% endblock %}
 
 {% block body %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
     <h1>Liste des Factures</h1>
     
     <table class="table">
