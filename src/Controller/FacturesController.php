@@ -166,7 +166,11 @@ private function sendEmailNotification(MailerInterface $mailer, Associations $as
      */
     public function showAllFactures(EntityManagerInterface $entityManager, int $associationId): Response
     {
-        $factures = $entityManager->getRepository(Facture::class)->findBy(['associationId' => $associationId]);
+        $factures = $entityManager->getRepository(Facture::class)->findBy(
+            ['associationId' => $associationId],
+            ['createdAt' => 'DESC']
+        );
+        
 
         return $this->render('facturation/show_list_factures.html.twig', [
             'factures' => $factures,
