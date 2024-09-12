@@ -17,7 +17,12 @@
 
             <div id="filePreviewContainer" style="display:none;">
                 <h5>Aperçu des fichiers :</h5>
-                <div id="filePreview"></div>
+                <ul id="filePreview"></ul>
+            </div>
+
+            <div id="pdfViewer" style="margin-top: 20px; display:none;">
+                <h5>Aperçu du PDF sélectionné :</h5>
+                <iframe id="pdfIframe" style="width:100%; height:600px;"></iframe>
             </div>
 
             <button type="submit" class="btn btn-primary">Envoyer</button>
@@ -32,13 +37,16 @@
             var fileCount = document.getElementById('fileCount');
             var filePreviewContainer = document.getElementById('filePreviewContainer');
             var filePreview = document.getElementById('filePreview');
+            var pdfViewer = document.getElementById('pdfViewer');
+            var pdfIframe = document.getElementById('pdfIframe');
 
             // Cacher le compteur de fichiers et l'aperçu par défaut
             fileCount.style.display = 'none';
             filePreviewContainer.style.display = 'none';
+            pdfViewer.style.display = 'none';
 
             if (pdfInput) {
-                pdfInput.addEventListener('change', function() {
+                pdfInput.addEventListener('change', function(event) {
                     var files = pdfInput.files;
                     var numberOfFiles = files.length;
 
@@ -53,39 +61,48 @@
                             var file = files[i];
 
                             if (file.type === 'application/pdf') {
-                                var reader = new FileReader();
+                                var listItem = document.createElement('li');
+                                listItem.textContent = file.name;
 
-                                reader.onload = (function(file) {
-                                    return function(e) {
-                                        console.log('Aperçu pour :', file.name);
-                                        var previewItem = document.createElement('div');
-                                        previewItem.classList.add('file-preview-item');
-                                        previewItem.style.marginBottom = '20px';  // Ajouter un espace entre les aperçus
-
-                                        var iframe = document.createElement('iframe');
-                                        iframe.src = e.target.result;
-                                        iframe.style.width = "100%";
-                                        iframe.style.height = "600px";  // Augmenter la hauteur de l'aperçu
-
-                                        previewItem.appendChild(iframe);
-                                        filePreview.appendChild(previewItem);
+                                // Créer un bouton pour afficher l'aperçu
+                                var previewButton = document.createElement('button');
+                                previewButton.textContent = 'Afficher l’aperçu';
+                                previewButton.style.marginLeft = '10px';
+                                previewButton.type = 'button';  // Assurez-vous que ce bouton n'est pas de type "submit"
+                                previewButton.addEventListener('click', (function(file) {
+                                    return function() {
+                                        loadPdfPreview(file);
                                     };
-                                })(file);
+                                })(file));
 
-                                reader.readAsDataURL(file);
+                                listItem.appendChild(previewButton);
+                                filePreview.appendChild(listItem);
                             } else {
-                                var previewItem = document.createElement('div');
-                                previewItem.classList.add('file-preview-item');
-                                previewItem.textContent = file.name + ' (non pris en charge pour l’aperçu)';
-                                filePreview.appendChild(previewItem);
+                                var listItem = document.createElement('li');
+                                listItem.textContent = file.name + ' (non pris en charge pour l’aperçu)';
+                                filePreview.appendChild(listItem);
                             }
                         }
                     } else {
                         // Si aucun fichier n'est sélectionné, cacher le texte et l'aperçu
                         fileCount.style.display = 'none';
                         filePreviewContainer.style.display = 'none';
+                        pdfViewer.style.display = 'none';
                     }
                 });
+            }
+
+            // Fonction pour charger et afficher un aperçu PDF dans un iframe
+            function loadPdfPreview(file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Afficher le conteneur d'aperçu PDF et charger le fichier dans l'iframe
+                    pdfIframe.src = e.target.result;
+                    pdfViewer.style.display = 'block';  // Afficher l'aperçu
+                };
+
+                reader.readAsDataURL(file);
             }
         });
     </script>
