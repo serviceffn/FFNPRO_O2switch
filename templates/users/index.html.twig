@@ -3,7 +3,7 @@
 {% block title %}FFNPRO{% endblock %}
 
 {% block javascripts %}
-        <!-- Chargement de jQuery -->
+    <!-- Chargement de jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
     <!-- Chargement de popper.js -->
@@ -14,7 +14,6 @@
 {% endblock %}
 
 {% block body %}
-    
     {# TOP #}
     <h1 style='padding-top:0.2%;text-align:center;color:#43A3C8;font-weight:bold'>Licencié(e)s</h1>
     <p style='text-align:center'>{{ app.user.nom }}</p>
@@ -32,6 +31,7 @@
             <a href="{{ path('users_new', {'id': app.user.id}) }}" class='btn btn-success' style='margin-right:10%;margin-left:11%'>Ajouter un(e) licencié(e)</a> 
         </div>
     {% endif %}
+    
     {# DIV ADD EXPORT #}
     {% if app.user.id == 94 %}
         <div style='border:2px solid #818181;border-radius:2%;width :40%; height:14em; text-align:center;margin-left:52%;background-color:#F5F5F5;'>
@@ -40,19 +40,19 @@
             <p style='position:absolute;margin-left:3%'>Début : </p>{{ form_widget(formDate.dateDebut, { 'attr': {'style': "margin-left:35%;width:50%"} }) }}
             <p style='position:absolute;margin-left:3%'>Fin : </p>{{ form_widget(formDate.dateFin, { 'attr': {'style': "margin-left:35%;width:50%"} }) }}
             {{ form_end(formDate) }}
-            
         </div>
         <div style='border:2px solid #818181;border-radius:2%;width :40%; height:13em; text-align:center;margin-left:10%;background-color:#F5F5F5;margin-top:2%;float:left'>
             <div style='margin-right:9%;margin-left:9%;margin-top:2%'>            
-                  {{ form(formFiltre) }} 
+                {{ form(formFiltre) }} 
             </div>
         </div>  
         <div style='border:2px solid #818181;border-radius:2%;width :40%; height:13em; text-align:center;margin-left:52%;background-color:#F5F5F5;margin-top:2%'>
             <div style='margin-right:9%;margin-left:9%;margin-top:2%'>            
-                  {{ form(form) }} 
+                {{ form(form) }} 
             </div>
         </div>   
     {% endif %}
+    
     {% if app.user.id != 94 %}
         <div style='border:2px solid #818181;border-radius:2%;width :40%; height:13em; text-align:center;margin-left:30%;background-color:#F5F5F5;margin-top:2%'>
             <div style='margin-right:9%;margin-left:9%;margin-top:2%'>  
@@ -65,107 +65,110 @@
         </div> 
         <div style='border:2px solid #818181;border-radius:2%;width :40%; height:13em; text-align:center;margin-left:30%;background-color:#F5F5F5;margin-top:2%'>
             <div style='margin-right:9%;margin-left:9%;margin-top:2%'>            
-                  {{ form(form) }} 
+                {{ form(form) }} 
             </div>
         </div>
-        
     {% endif %}
-    
-     
     
     {# <div style='margin-left:35%;margin-right:35%;margin-top:3%'>
         {{form(formDate)}}
     </div> #}
-    {% if  app.request.attributes.get('_route') == 'users_centre' and app.user.id != 94 %}
+    
+    {% if app.request.attributes.get('_route') == 'users_centre' and app.user.id != 94 %}
         <a href="{{ path('users_centre_alphabetique', {'id': app.user.id}) }}" class='btn btn-success' style='margin-left:10%;margin-top:5%'>Trier par ordre alphabétique</a>
     {% elseif app.user.id != 94 %} 
         <a href="{{ path('users_centre', {'id': app.user.id}) }}" class='btn btn-success' style='margin-left:10%;margin-top:5%'>Trier par dernièr(e) adhérent(e)</a>
     {% endif %}
 
-    
-        <table class="table table-striped" style="margin-left:10%;width:82%">
-                <thead>
-                    <tr style=''>
-                        {# <th>Id</th> #}
-                        <th>Nom / Prénom</th>
-                        <th>Centre</th>
-                        <th>Licence</th>
-                        <th>Date Création</th>
-                        <th>Impression</th>
-                        <th>actions</th>
-                        
+    <table class="table table-striped" style="margin-left:10%;width:82%">
+        <thead>
+            <tr>
+                <th>Nom / Prénom</th>
+                <th>Centre</th>
+                <th>Licence</th>
+                <th>Date Création</th>
+                <th>Impression</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if app.user.id != 94 %}
+                {% for centre in associationsPages %}
+                    <tr>
+                        <td><b style='color:#43A3C8;'>{{ centre.nom }}</b> {{ centre.prenom }}</td>
+                        <td>{{ centre.nomm }}</td>  
+                        <td>{{ centre.n_licence }}</td>
+                        <td>{{ centre.MostRecentDate|split(' ', 2)|first }}</td>
+                        {% if centre.is_imprimed == true and centre.n_licence|split('-', 4)|first == "now"|date("Y") %}
+                            <td>✔️ Licence imprimée</td>
+                        {% elseif centre.is_imprimed == false and centre.n_licence|split('-', 4)|first == "now"|date("Y") %}
+                            <td>❌ Licence en attente d'impression</td>
+                        {% elseif centre.n_licence|split('-', 4)|first != "now"|date("Y") %}
+                            <td>-</td>
+                        {% endif %}
+                        <td>
+                            <a href="{{ path('users_show', {'id': centre.id}) }}">Voir </a>
+                            <a href="{{ path('users_edit', {'id': centre.id}) }}">Modifier</a>
+                            {% if centre.n_licence|split('-', 4)|first == "now"|date("Y") %}
+                            {% else %}
+                                <a href="{{ path('choice_renouvellement', {'id': centre.id}) }}"> | Renouveler </a>
+                            {% endif %}
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-        {% if app.user.id != 94 %}
-            {% for centre in associationsPages %}
-                <tr>
-                    {# <td>{{ centre.id }}</td> #}
-                    <td><b style='color:#43A3C8;'>{{ centre.nom }}</b> {{ centre.prenom }}</td>
-                    <td>{{ centre.nomm }}</td>  
-                    <td>{{ centre.n_licence }}</td>
-                    <td>{{ centre.MostRecentDate|split(' ', 2)|first   }}</td>
-                    {% if centre.is_imprimed == true and centre.n_licence|split('-', 4)|first == "now"|date("Y")  %}
-                        <td>✔️ Licence imprimée</td>
-                    {% elseif centre.is_imprimed == false and centre.n_licence|split('-', 4)|first == "now"|date("Y")   %}
-                        <td>❌ Licence en attente d'impression</td>
-                    {% elseif centre.n_licence|split('-', 4)|first != "now"|date("Y") %}
-                        <td>-</td>
-                    {% endif %}
-                    <td>
-                        <a href="{{ path('users_show', {'id': centre.id}) }}">Voir </a>
-                        <a href="{{ path('users_edit', {'id': centre.id}) }}">Modifier</a>
-                        {% if centre.n_licence|split('-', 4)|first == "now"|date("Y")  %}
-                        {% else %}
-                            <a href="{{ path('choice_renouvellement', {'id': centre.id}) }}"> | Renouveler </a>
-                        {% endif %}
-                    </td>
-                </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="13">no records found</td>
+                    </tr>
+                {% endfor %}
+            {% elseif app.user.id == 94 %}
+                {% for user in associationsPage %}
+                    <tr>
+                        <td><b style='color:#43A3C8;'>{{ user.nom }}</b> {{ user.prenom }}</td>
+                        <td>{{ user.nomm }}</td> 
+                        <td>{{ user.n_licence }}</td>
+                        <td>{{ user.MostRecentDate|split(' ', 2)|first }}</td>
+{% if user.is_imprimed == true and user.n_licence|split('-', 4)|first == "now"|date("Y") %}
+    <td>
+        ✔️{% if user.impression == 0 %}(Qrcode envoyé le <b>{{ user.imprimed_at|date('d-m-Y') }}</b>){% else %}(Imprimée le <b>{{ user.imprimed_at|date('d-m-Y') }}</b>)<br>{% endif %}
+        <a href="{{ path('users_update_imprimed', {'id': user.id}) }}" style='color:#43A3C8;'>
+            {% if user.impression == 0 %}
+                Convertir en carte
             {% else %}
-                <tr>
-                    <td colspan="13">no records found</td>
-                </tr>
-            {% endfor %}
-        {% elseif app.user.id == 94 %}
-            {% for user in associationsPage %}
-                <tr>
-                     {# <td>{{ user.id }}</td>  #}
-                    <td><b style='color:#43A3C8;'>{{ user.nom }}</b> {{ user.prenom }}</td>
-                    <td>{{ user.nomm }}</td> 
-                    <td>{{ user.n_licence }}</td>
-                    <td>{{ user.MostRecentDate|split(' ', 2)|first  }}</td>
-                    {% if user.is_imprimed == true and user.n_licence|split('-', 4)|first == "now"|date("Y")  %}
-                        <td>✔️{% if user.impression == 0 %}(Qrcode envoyé le <b>{{user.imprimed_at|date('d-m-Y')}}</b>){% else %}(Imprimée le <b>{{user.imprimed_at|date('d-m-Y')}}</b>)<br>{% endif %} <a href="{{ path('users_update_imprimed_false', {'id': user.id}) }}" style='color:#43A3C8;'>Reset</a></td>
-                    {% elseif user.is_imprimed == false and user.n_licence|split('-', 4)|first == "now"|date("Y")   %}
-                        <td>❌</td>
-                    {% elseif user.n_licence|split('-', 4)|first != "now"|date("Y") %}
-                        <td>-</td>
-                    {% endif %}
-                    <td>
-                        <a href="{{ path('users_show', {'id': user.id}) }}">Voir |</a>
-                        <a href="{{ path('users_edit', {'id': user.id}) }}">Modifier</a>
-                        {% if user.n_licence|split('-', 4)|first == "now"|date("Y")  %}
-                        {% else %}
-                            <a href="{{ path('choice_renouvellement', {'id': user.id}) }}"> | Renouveler </a>
-                        {% endif %}
-                        {% if user.is_imprimed == true %}
-                        {% elseif user.n_licence|split('-', 4)|first == "now"|date("Y")  %}
-                            <a href="{{ path('pdfpdf', {'id': user.id}) }}"> | Impression </a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="13">no records found</td>
-                </tr>
-            {% endfor %}
+                Convertir en QR code
+            {% endif %}
+        </a>
+    </td>
+{% elseif user.is_imprimed == false and user.n_licence|split('-', 4)|first == "now"|date("Y") %}
+    <td>❌ <a href="{{ path('users_update_imprimed', {'id': user.id}) }}" style='color:#43A3C8;'>Convertir en QR code</a></td>
+{% elseif user.n_licence|split('-', 4)|first != "now"|date("Y") %}
+    <td>-</td>
+{% endif %}
 
 
-            
-        {% endif %}
+
+                        <td>
+                            <a href="{{ path('users_show', {'id': user.id}) }}">Voir |</a>
+                            <a href="{{ path('users_edit', {'id': user.id}) }}">Modifier</a>
+                            {% if user.n_licence|split('-', 4)|first == "now"|date("Y") %}
+                            {% else %}
+                                <a href="{{ path('choice_renouvellement', {'id': user.id}) }}"> | Renouveler </a>
+                            {% endif %}
+                            {% if user.is_imprimed == true %}
+                            {% elseif user.n_licence|split('-', 4)|first == "now"|date("Y") %}
+                                <a href="{{ path('pdfpdf', {'id': user.id}) }}"> | Impression </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="13">no records found</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
         </tbody> 
     </table>
-    {% if  app.request.attributes.get('_route') == 'users_index' %} 
+
+    {% if app.request.attributes.get('_route') == 'users_index' %} 
         <div style='margin-left:41%'>
             {{ knp_pagination_render(associationsPage) }}
         </div> 
@@ -174,7 +177,4 @@
             {{ knp_pagination_render(associationsPages) }}
         </div> 
     {% endif %}
-
-    
-    
 {% endblock %}
