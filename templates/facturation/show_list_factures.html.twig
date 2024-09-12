@@ -23,7 +23,7 @@
                 <tr>
 
                     <td>{{ facture.pdfFilename }}</td>
-                    <td>{{ facture.createdAt|date('Y-m-d H:i:s') }}</td>
+                    <td>{{ facture.createdAt|date('d-m-Y') }}</td>
                     <td>
                         {% if facture.pdfContent %}
                             <a href="{{ path('download_pdf', { 'id': facture.id }) }}" target="_blank">Voir la facture</a>
