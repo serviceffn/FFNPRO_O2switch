@@ -1524,6 +1524,34 @@ class UsersController extends AbstractController
         }
     }
 
+ /**
+ * @Route("/user/update-imprimed/{id}", name="users_update_imprimed", methods={"GET"})
+ */
+public function updateImprimed($id, Request $request)
+{
+    $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
+
+    if (!$user) {
+        throw $this->createNotFoundException('No user found for id '.$id);
+    }
+
+    // Logique de conversion
+    if ($user->getImpression() == 0) {
+        $user->setImpression(1); // Convertir en carte
+        $user->setIsImprimed(false); // La carte n'a pas encore été imprimée
+    } else {
+        $user->setImpression(0); // Convertir en QR code
+        $user->setIsImprimed(true); // Supposons que le QR code soit "imprimé"
+    }
+
+    $em = $this->getDoctrine()->getManager();
+    $em->persist($user);
+    $em->flush();
+
+    return $this->redirectToRoute('users_index'); // Rediriger vers la liste des utilisateurs
+}
+
+
 
     /**
      * @Route("/all_imprim", name="all_impression", methods={"POST","GET"}, requirements={"id":"\d+"})
