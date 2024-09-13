@@ -63,6 +63,7 @@ class UsersEditType extends AbstractType
                 'choices' => [
                     'Masculin' => 'Masculin',
                     'Feminin' => 'Feminin',
+                    'Autre' => 'Autre',
                 ],
             ])
             ->add('centre_emetteur', EntityType::class, [
