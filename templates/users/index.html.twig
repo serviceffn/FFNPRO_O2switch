@@ -137,6 +137,8 @@
                 Convertir en QR code
             {% endif %}
         </a>
+        <br>
+        <a href="{{ path('users_update_imprimed_false', {'id': user.id}) }}" style='color:#43A3C8;'>Reset</a>
     </td>
 {% elseif user.is_imprimed == false and user.n_licence|split('-', 4)|first == "now"|date("Y") %}
     <td>❌ <a href="{{ path('users_update_imprimed', {'id': user.id}) }}" style='color:#43A3C8;'>Convertir en QR code</a></td>
