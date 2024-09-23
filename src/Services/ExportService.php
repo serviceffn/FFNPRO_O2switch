@@ -272,37 +272,43 @@ class ExportService extends AbstractController
             return;
         }
     
+        // Ajouter le BOM pour UTF-8
         fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
     
-        $header_ar = array('Nom', 'Adultes', 'Hommes', 'Femmes', 'Enfants', 'Total');
+        // Ajouter l'en-tête CSV
+        $header_ar = ['Nom', 'Adultes', 'Hommes', 'Femmes', 'Enfants', 'Total'];
         fputcsv($file, $header_ar, ';');
     
         $entityManager = $this->managerRegistry->getManager();
     
-        $sql = "SELECT
-        a.nom AS nom_association,
-        SUM(CASE WHEN u.genre = 'Masculin' AND YEAR(CURRENT_DATE()) - YEAR(u.anniversaire) >= 18 THEN 1 ELSE 0 END) AS Hommes,
-        SUM(CASE WHEN u.genre = 'Feminin' AND YEAR(CURRENT_DATE()) - YEAR(u.anniversaire) >= 18 THEN 1 ELSE 0 END) AS Femmes,
-        SUM(CASE WHEN u.genre IN ('Masculin', 'Feminin') AND YEAR(CURRENT_DATE()) - YEAR(u.anniversaire) >= 18 THEN 1 ELSE 0 END) AS Adultes,
-        SUM(CASE WHEN YEAR(CURRENT_DATE()) - YEAR(u.anniversaire) < 18 THEN 1 ELSE 0 END) AS Enfants,
-        SUM(CASE WHEN YEAR(CURRENT_DATE()) - YEAR(u.anniversaire) >= 18 THEN 1 ELSE 0 END) + SUM(CASE WHEN YEAR(CURRENT_DATE()) - YEAR(u.anniversaire) < 18 THEN 1 ELSE 0 END) AS total_licencies
-    FROM
-        Users u
-    JOIN
-        Associations a ON u.centre_emetteur_id = a.id
-    JOIN
-        regions r ON a.region_id = r.id
-    WHERE
-        r.id = :region_id
-        AND u.n_licence LIKE CONCAT(YEAR(CURRENT_DATE()), '-%')
-        AND (
-            (DATE(u.created_at) BETWEEN :start_date AND :end_date)
-            OR
-            (DATE(u.renouvellement_at) BETWEEN :start_date AND :end_date)
-        )
-    GROUP BY
-        a.nom";
+        // Requête SQL mise à jour
+        $sql = "
+            SELECT
+                a.nom AS nom_association,
+                SUM(CASE WHEN u.genre = 'Masculin' AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Hommes,
+                SUM(CASE WHEN u.genre = 'Feminin' AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Femmes,
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Adultes,
+                SUM(CASE WHEN TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) < 18 THEN 1 ELSE 0 END) AS Enfants,
+                COUNT(u.id) AS total_licencies
+            FROM
+                Users u
+            JOIN
+                Associations a ON u.centre_emetteur_id = a.id
+            JOIN
+                regions r ON a.region_id = r.id
+            WHERE
+                r.id = :region_id
+                AND u.n_licence LIKE CONCAT(YEAR(CURRENT_DATE), '-%')
+                AND (
+                    (DATE(u.created_at) BETWEEN :start_date AND :end_date)
+                    OR
+                    (DATE(u.renouvellement_at) BETWEEN :start_date AND :end_date)
+                )
+            GROUP BY
+                a.nom
+        ";
     
+        // Préparation de la requête
         $statement = $entityManager->getConnection()->prepare($sql);
         $parameters = [
             'region_id' => $regionsId,
@@ -311,6 +317,7 @@ class ExportService extends AbstractController
         ];
         $resultSet = $statement->executeQuery($parameters);
     
+        // Écriture des résultats dans le fichier CSV
         while ($row = $resultSet->fetchAssociative()) {
             $array = [
                 $row['nom_association'],
@@ -329,6 +336,7 @@ class ExportService extends AbstractController
         fclose($file);
         exit();
     }
+    
 
     public function exportAllRegionsLicenceSeller($usersRepository, $startingDate, $endingDate)
     {

@@ -1276,7 +1276,8 @@ class UsersRepository extends ServiceEntityRepository
 
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
-            AND genre = "Masculin" 
+            AND genre = "Masculin"
+            AND year(CURRENT_DATE)-year(anniversaire) >= 18
             AND n_licence like CONCAT(year(CURRENT_DATE),"-%")
             AND (
                 (DATE(created_at) BETWEEN :start_date AND :end_date)
@@ -1303,7 +1304,8 @@ class UsersRepository extends ServiceEntityRepository
 
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :centre_emetteur_id 
-            AND genre = "Feminin" 
+            AND genre = "Feminin"
+            AND year(CURRENT_DATE)-year(anniversaire) >= 18
             AND n_licence LIKE CONCAT(year(CURRENT_DATE), "-%")
             AND (
                 (DATE(created_at) BETWEEN :start_date AND :end_date)
@@ -1423,7 +1425,8 @@ class UsersRepository extends ServiceEntityRepository
 
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :idRegion             
-            AND genre = "Masculin" 
+            AND genre = "Masculin"
+            AND year(CURRENT_DATE)-year(anniversaire) >= 18 
             AND n_licence LIKE CONCAT(year(CURRENT_DATE), "-%")
             AND (
                 (DATE(created_at) BETWEEN :start_date AND :end_date)
@@ -1450,7 +1453,8 @@ class UsersRepository extends ServiceEntityRepository
 
         $sql = 'SELECT count(*) FROM Users 
             WHERE centre_emetteur_id = :idRegion 
-            AND genre = "Feminin" 
+            AND genre = "Feminin"
+            AND year(CURRENT_DATE)-year(anniversaire) >= 18 
             AND n_licence LIKE CONCAT(year(CURRENT_DATE), "-%")
             AND (
                 (DATE(created_at) BETWEEN :start_date AND :end_date)
