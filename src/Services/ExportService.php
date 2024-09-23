@@ -16,23 +16,30 @@ class ExportService extends AbstractController
 
     public function exportAll($export, $usersRepository)
     {
-
         $filename = date('d-m-Y') . '.csv';
-
-        $results = $usersRepository->findByDateDebutAndFin($export->get('dateDebut')->getData(), $export->get('dateFin')->getData());
+        
+        $results = $usersRepository->findByDateDebutAndFin(
+            $export->get('dateDebut')->getData(),
+            $export->get('dateFin')->getData()
+        );
         $now = new \DateTime();
-
-        $header_ar = array('Licence;Nom;Prenom;Genre;Age;DateNaissance;Telephone;Email;Centre;Adresse;Complement;Zip;Ville;Pays;DemandeImpression;RGPD;Creation;Renouvellement;');
-
-        $now = new \DateTime();
-
+    
+        // Mettre à jour l'en-tête pour inclure 'Type'
+        $header_ar = array('Licence;Nom;Prenom;Genre;Age;DateNaissance;Telephone;Email;Centre;Adresse;Complement;Zip;Ville;Pays;DemandeImpression;RGPD;Creation;Renouvellement;Type');
+    
         $file = fopen($filename, "w");
-
+    
+        // Ajouter le BOM pour l'encodage UTF-8
         fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
         fwrite($file, "\xEF\xBB\xBF");
-
-        fputcsv($file, $header_ar);
+    
+        // Écrire l'en-tête
+        fputcsv($file, explode(';', $header_ar[0]), ';');
+        
         foreach ($results as $result) {
+            // Assurez-vous que 'type' est inclus dans le résultat de la requête
+            $associationType = isset($result['association_type']) ? $result['association_type'] : 'N/A'; // Remplacez 'N/A' par une valeur par défaut si nécessaire
+    
             $array = [
                 $result['n_licence'],
                 $result['nom'],
@@ -52,24 +59,24 @@ class ExportService extends AbstractController
                 $result['agree_terms'] == '0' ? 'Non' : 'Oui',
                 (new \DateTime($result['created_at']))->format('d-m-Y'),
                 $result['renouvellement_at'] == '30-11--0001' ? '-' : (new \DateTime($result['renouvellement_at']))->format('d-m-Y'),
+                $associationType, // Ajout de la colonne 'Type'
             ];
-
-            // array($result->getNom());
-            // var_dumpk($result);
+    
             fputcsv($file, $array, ';');
         }
-
+    
         fclose($file);
-
+    
         header("Content-Description: File Transfer");
         header("Content-Disposition: attachment; filename=" . $filename);
         header("Content-Type: application/csv; ");
-
+    
         readfile($filename);
-
+    
         unlink($filename);
         exit();
     }
+    
 
     public function exportAssoc($exportAssoc, $usersRepository)
     {

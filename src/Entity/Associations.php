@@ -16,8 +16,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class Associations implements UserInterface
 {
-
-
+ 
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
