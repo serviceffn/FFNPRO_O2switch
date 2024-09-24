@@ -25,13 +25,39 @@ class RegionsController extends AbstractController
     /**
      * @Route("/", name="regions_index", methods={"GET"})
      */
-    public function index(RegionsRepository $regionsRepository): Response
+    public function index(Request $request, RegionsRepository $regionsRepository, ExportService $exportService): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        $form = $this->createForm(ExportType::class);
         return $this->render('regions/index.html.twig', [
             'regions' => $regionsRepository->findAll(),
+            'form' => $form->createView(),
         ]);
+    }
+
+
+        /**
+     * @Route("/export", name="regions_export", methods={"POST"})
+     */
+    public function export(Request $request, RegionsRepository $regionsRepository, ExportService $exportService): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $form = $this->createForm(ExportType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $startingDate = $data['dateDebut'];
+            $endingDate = $data['dateFin'];
+
+            // Appel de la méthode d'export
+            return $exportService->exportAllRegions($regionsRepository, $startingDate, $endingDate);
+        }
+
+        // Si le formulaire n'est pas valide, redirigez vers l'index ou gérez l'erreur comme vous le souhaitez
+        return $this->redirectToRoute('regions_index');
     }
 
     /**
@@ -58,14 +84,32 @@ class RegionsController extends AbstractController
         ]);
     }
 
-        /**
-     * @Route("/csvv_region", name="csvv_region")
-     */
-    public function downloadCSV(RegionsRepository $regionsRepository, ExportService $exportService)
-    {
-       $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-       $exportRegionsRepository = $exportService->exportRegionsRepository($regionsRepository);  
+/**
+ * @Route("/regions/csv_region", name="csv_region")
+ */
+public function downloadCSV(Request $request, RegionsRepository $regionsRepository, ExportService $exportService)
+{
+    $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+    $form = $this->createForm(ExportType::class);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Récupérer les données du formulaire
+        $data = $form->getData();
+        $startingDate = $data['dateDebut'];
+        $endingDate = $data['dateFin'];
+
+        // Appel de la méthode d'export
+        $exportService->exportAllRegions($regionsRepository, $startingDate, $endingDate);
+
+        return $this->redirectToRoute('regions_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    return $this->render('regions/index.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 
 
     /**

@@ -37,8 +37,7 @@ class ExportService extends AbstractController
         fputcsv($file, explode(';', $header_ar[0]), ';');
         
         foreach ($results as $result) {
-            // Assurez-vous que 'type' est inclus dans le résultat de la requête
-            $associationType = isset($result['association_type']) ? $result['association_type'] : 'N/A'; // Remplacez 'N/A' par une valeur par défaut si nécessaire
+            $associationType = isset($result['association_type']) ? $result['association_type'] : 'N/A';
     
             $array = [
                 $result['n_licence'],
@@ -266,6 +265,88 @@ class ExportService extends AbstractController
     
         exit();
     }
+
+    public function exportAllRegions($regionsRepository, $startingDate, $endingDate)
+    {
+        dump($startingDate);
+        dump($endingDate);
+
+    $filename = date('d-m-Y') . '-all-regions.csv';
+    
+
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+    $file = fopen('php://output', 'w');
+    if ($file === false) {
+        return;
+    }
+
+    // Ajouter le BOM pour UTF-8
+    fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+    // Ajouter l'en-tête CSV
+    $header_ar = ['Région', 'Nom', 'Adultes', 'Hommes', 'Femmes', 'Enfants', 'Total'];
+    fputcsv($file, $header_ar, ';');
+
+    $entityManager = $this->managerRegistry->getManager();
+
+    // Requête SQL pour toutes les régions
+    $sql = "
+        SELECT
+            r.nom AS nom_region,
+            a.nom AS nom_association,
+            SUM(CASE WHEN u.genre = 'Masculin' AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Hommes,
+            SUM(CASE WHEN u.genre = 'Feminin' AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Femmes,
+            SUM(CASE WHEN TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Adultes,
+            SUM(CASE WHEN TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) < 18 THEN 1 ELSE 0 END) AS Enfants,
+            COUNT(u.id) AS total_licencies
+        FROM
+            Users u
+        JOIN
+            Associations a ON u.centre_emetteur_id = a.id
+        JOIN
+            regions r ON a.region_id = r.id
+        WHERE
+            u.n_licence LIKE CONCAT(YEAR(CURRENT_DATE), '-%')
+            AND (
+                (DATE(u.created_at) BETWEEN :start_date AND :end_date)
+                OR
+                (DATE(u.renouvellement_at) BETWEEN :start_date AND :end_date)
+            )
+        GROUP BY
+            r.nom, a.nom
+    ";
+
+    // Préparation de la requête
+    $statement = $entityManager->getConnection()->prepare($sql);
+    $parameters = [
+        'start_date' => $startingDate,
+        'end_date' => $endingDate,
+    ];
+    $resultSet = $statement->executeQuery($parameters);
+
+    // Écriture des résultats dans le fichier CSV
+    while ($row = $resultSet->fetchAssociative()) {
+        $array = [
+            $row['nom_region'],
+            $row['nom_association'],
+            $row['Adultes'],
+            $row['Hommes'],
+            $row['Femmes'],
+            $row['Enfants'],
+            $row['total_licencies']
+        ];
+
+        fputcsv($file, array_map(function ($item) {
+            return mb_convert_encoding($item, 'UTF-8', 'auto');
+        }, $array), ';');
+    }
+
+    fclose($file);
+    exit();
+}
+
     
     public function exportAllAssocByRegions($export, $regionsRepository, $regionsId, $regionsName, $startingDate, $endingDate)
     {
@@ -315,7 +396,6 @@ class ExportService extends AbstractController
                 a.nom
         ";
     
-        // Préparation de la requête
         $statement = $entityManager->getConnection()->prepare($sql);
         $parameters = [
             'region_id' => $regionsId,
@@ -324,7 +404,6 @@ class ExportService extends AbstractController
         ];
         $resultSet = $statement->executeQuery($parameters);
     
-        // Écriture des résultats dans le fichier CSV
         while ($row = $resultSet->fetchAssociative()) {
             $array = [
                 $row['nom_association'],
@@ -384,8 +463,8 @@ class ExportService extends AbstractController
         }
     
         fclose($file);
-    
     }
+
     public function exportAllAssocByCentres($export, $startingDate, $endingDate)
     {
         $filename = date('d-m-Y') . '-Centres' . '.csv';
