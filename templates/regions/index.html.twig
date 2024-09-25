@@ -23,6 +23,17 @@
     {{ form_end(form) }} {# Fin du formulaire Symfony #}
 </div>
 
+    <div style='border:2px solid #818181; border-radius: 30px; margin-left:35%; margin-right:35%; padding:10px; margin-top:20px'>
+        <p style='margin-top:3%'>Export des associations par région</p>
+        {{ form_start(form_assoc, {'action': path('regions_assoc_export'), 'method': 'POST'}) }} 
+            <div>
+                {{ form_row(form_assoc.dateDebut, {'label': 'Date de début'}) }} 
+            </div>
+            <div>
+                {{ form_row(form_assoc.dateFin, {'label': 'Date de fin'}) }} 
+            </div>
+        {{ form_end(form_assoc) }}
+    </div>
 
 
 
