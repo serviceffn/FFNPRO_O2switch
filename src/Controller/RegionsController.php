@@ -37,29 +37,6 @@ class RegionsController extends AbstractController
     }
 
 
-        /**
-     * @Route("/export", name="regions_export", methods={"POST"})
-     */
-    public function export(Request $request, RegionsRepository $regionsRepository, ExportService $exportService): Response
-    {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-
-        $form = $this->createForm(ExportType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $startingDate = $data['dateDebut'];
-            $endingDate = $data['dateFin'];
-
-            // Appel de la méthode d'export
-            return $exportService->exportAllRegions($regionsRepository, $startingDate, $endingDate);
-        }
-
-        // Si le formulaire n'est pas valide, redirigez vers l'index ou gérez l'erreur comme vous le souhaitez
-        return $this->redirectToRoute('regions_index');
-    }
-
     /**
      * @Route("/new", name="regions_new", methods={"GET", "POST"})
      */
@@ -84,32 +61,53 @@ class RegionsController extends AbstractController
         ]);
     }
 
-/**
- * @Route("/regions/csv_region", name="csv_region")
- */
-public function downloadCSV(Request $request, RegionsRepository $regionsRepository, ExportService $exportService)
-{
-    $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+    /**
+     * @Route("/export", name="regions_export", methods={"POST"})
+     */
+    public function export(Request $request, ExportService $exportService): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-    $form = $this->createForm(ExportType::class);
-    $form->handleRequest($request);
+        $form = $this->createForm(ExportType::class);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Récupérer les données du formulaire
-        $data = $form->getData();
-        $startingDate = $data['dateDebut'];
-        $endingDate = $data['dateFin'];
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $startingDate = $data['dateDebut'];
+            $endingDate = $data['dateFin'];
 
-        // Appel de la méthode d'export
-        $exportService->exportAllRegions($regionsRepository, $startingDate, $endingDate);
+            $exportService->exportAllRegions($startingDate, $endingDate);
+        }
 
-        return $this->redirectToRoute('regions_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('regions_index');
     }
 
-    return $this->render('regions/index.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
+// /**
+//  * @Route("/regions/csv_region", name="csv_region")
+//  */
+// public function downloadCSV(Request $request, RegionsRepository $regionsRepository, ExportService $exportService)
+// {
+//     $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+//     $form = $this->createForm(ExportType::class);
+//     $form->handleRequest($request);
+
+//     if ($form->isSubmitted() && $form->isValid()) {
+//         // Récupérer les données du formulaire
+//         $data = $form->getData();
+//         $startingDate = $data['dateDebut'];
+//         $endingDate = $data['dateFin'];
+
+//         // Appel de la méthode d'export
+//         $exportService->exportAllRegions($regionsRepository, $startingDate, $endingDate);
+
+//         return $this->redirectToRoute('regions_index', [], Response::HTTP_SEE_OTHER);
+//     }
+
+//     return $this->render('regions/index.html.twig', [
+//         'form' => $form->createView(),
+//     ]);
+// }
 
 
     /**

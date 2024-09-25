@@ -11,7 +11,7 @@
     <p style='text-align:center'>{{ app.user.nom }}</p>
     <hr style='background-color:black;border-none;height:0.5px;margin-right:-100%;margin-left:-100%'>
 
-<div style='border:2px solid #818181;border-radius:2%;width :40%; height:12em; text-align:center;margin-left:30%;background-color:#F5F5F5;margin-top:2%'>
+    <div style='border:2px solid #818181; border-radius: 30px; margin-left:35%; margin-right:35%; padding:10px'>
     <p style='margin-top:3%'>Export des régions</p>
     {{ form_start(form, {'action': path('regions_export'), 'method': 'POST'}) }} {# Ajoutez l'action et la méthode POST #}
         <div>
@@ -20,10 +20,8 @@
         <div>
             {{ form_row(form.dateFin, {'label': 'Date de fin'}) }} {# Rendu du champ dateFin #}
         </div>
-        <button type="submit" class='btn btn-primary' style='margin-right:10%;margin-left:10%'>Exporter</button>
     {{ form_end(form) }} {# Fin du formulaire Symfony #}
 </div>
-
 
 
 
