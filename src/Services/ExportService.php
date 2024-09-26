@@ -340,6 +340,84 @@ class ExportService extends AbstractController
         fclose($file);
         exit();
     }
+    public function exportAllRegionsAndAsssoc($startingDate, $endingDate): void
+    {
+        $filename = date('d-m-Y') . '-all-regions.csv';
+        // dump($startingDate);
+        // dump($endingDate);
+
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $formattedStartDate = $startingDate->format('Y-m-d');
+        $formattedEndDate = $endingDate->format('Y-m-d');
+
+
+        $file = fopen('php://output', 'w');
+        if ($file === false) {
+            return;
+        }
+
+        fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        $header_ar = ['Région', 'Adultes', 'Hommes', 'Femmes', 'Enfants', 'Total'];
+        fputcsv($file, $header_ar, ';');
+
+        $entityManager = $this->managerRegistry->getManager();
+
+        $sql = "SELECT 
+            r.nom AS nom_region, 
+            a.nom AS nom_association, 
+            SUM(CASE WHEN TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Adultes,
+            SUM(CASE WHEN u.genre = 'Masculin' AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Hommes,
+            SUM(CASE WHEN u.genre = 'Feminin' AND TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) >= 18 THEN 1 ELSE 0 END) AS Femmes,
+            SUM(CASE WHEN TIMESTAMPDIFF(YEAR, u.anniversaire, CURRENT_DATE) < 18 THEN 1 ELSE 0 END) AS Enfants,
+            COUNT(u.id) AS total_licencies
+        FROM 
+            Users u
+        JOIN 
+            Associations a ON u.centre_emetteur_id = a.id
+        JOIN 
+            regions r ON a.region_id = r.id
+        WHERE 
+            u.n_licence LIKE CONCAT(YEAR(CURRENT_DATE), '-%')
+            AND (
+                (DATE(u.created_at) BETWEEN :start_date AND :end_date)
+                OR 
+                (DATE(u.renouvellement_at) BETWEEN :start_date AND :end_date)
+            )
+        GROUP BY 
+            r.nom, a.nom
+        ORDER BY 
+            r.nom, a.nom";
+
+        $statement = $entityManager->getConnection()->prepare($sql);
+        $parameters = [
+            'start_date' => $formattedStartDate,
+            'end_date' => $formattedEndDate,
+        ];
+        $resultSet = $statement->executeQuery($parameters);
+
+
+        while ($row = $resultSet->fetchAssociative()) {
+            $array = [
+                $row['nom_region'],
+                $row['nom_association'],
+                $row['Adultes'],
+                $row['Hommes'],
+                $row['Femmes'],
+                $row['Enfants'],
+                $row['total_licencies']
+            ];
+
+            fputcsv($file, array_map(function ($item) {
+                return mb_convert_encoding($item, 'UTF-8', 'auto');
+            }, $array), ';');
+        }
+
+        fclose($file);
+        exit();
+    }
 
 
 

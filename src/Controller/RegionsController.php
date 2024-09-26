@@ -30,9 +30,11 @@ class RegionsController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $form = $this->createForm(ExportType::class);
+        $formAssoc = $this->createForm(ExportType::class);
         return $this->render('regions/index.html.twig', [
             'regions' => $regionsRepository->findAll(),
             'form' => $form->createView(),
+            'form_assoc' => $formAssoc->createView(),
         ]);
     }
 
@@ -77,6 +79,26 @@ class RegionsController extends AbstractController
             $endingDate = $data['dateFin'];
 
             $exportService->exportAllRegions($startingDate, $endingDate);
+        }
+
+        return $this->redirectToRoute('regions_index');
+    }
+    /**
+     * @Route("/export_assoc", name="regions_assoc_export", methods={"POST"})
+     */
+    public function exportRegionsAndAssoc(Request $request, ExportService $exportService): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $form = $this->createForm(ExportType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $startingDate = $data['dateDebut'];
+            $endingDate = $data['dateFin'];
+
+            $exportService->exportAllRegionsAndAsssoc($startingDate, $endingDate);
         }
 
         return $this->redirectToRoute('regions_index');
