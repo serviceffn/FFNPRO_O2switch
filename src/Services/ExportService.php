@@ -343,28 +343,27 @@ class ExportService extends AbstractController
     public function exportAllRegionsAndAsssoc($startingDate, $endingDate): void
     {
         $filename = date('d-m-Y') . '-all-regions.csv';
-        // dump($startingDate);
-        // dump($endingDate);
-
+    
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-
+    
         $formattedStartDate = $startingDate->format('Y-m-d');
         $formattedEndDate = $endingDate->format('Y-m-d');
-
-
+    
         $file = fopen('php://output', 'w');
         if ($file === false) {
             return;
         }
-
+    
+        // Ajout du BOM pour l'encodage UTF-8
         fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-        $header_ar = ['Région', 'Adultes', 'Hommes', 'Femmes', 'Enfants', 'Total'];
+    
+        // Mise à jour des en-têtes pour inclure la colonne Association
+        $header_ar = ['Région', 'Association', 'Adultes', 'Hommes', 'Femmes', 'Enfants', 'Total'];
         fputcsv($file, $header_ar, ';');
-
+    
         $entityManager = $this->managerRegistry->getManager();
-
+    
         $sql = "SELECT 
             r.nom AS nom_region, 
             a.nom AS nom_association, 
@@ -390,36 +389,35 @@ class ExportService extends AbstractController
             r.nom, a.nom
         ORDER BY 
             r.nom, a.nom";
-
+    
         $statement = $entityManager->getConnection()->prepare($sql);
         $parameters = [
             'start_date' => $formattedStartDate,
             'end_date' => $formattedEndDate,
         ];
         $resultSet = $statement->executeQuery($parameters);
-
-
+    
+        // Ajout des données dans le fichier CSV
         while ($row = $resultSet->fetchAssociative()) {
             $array = [
-                $row['nom_region'],
-                $row['nom_association'],
-                $row['Adultes'],
-                $row['Hommes'],
-                $row['Femmes'],
-                $row['Enfants'],
-                $row['total_licencies']
+                $row['nom_region'],          // Colonne 'Région'
+                $row['nom_association'],     // Colonne 'Association'
+                $row['Adultes'],             // Colonne 'Adultes'
+                $row['Hommes'],              // Colonne 'Hommes'
+                $row['Femmes'],              // Colonne 'Femmes'
+                $row['Enfants'],             // Colonne 'Enfants'
+                $row['total_licencies']      // Colonne 'Total'
             ];
-
+    
             fputcsv($file, array_map(function ($item) {
                 return mb_convert_encoding($item, 'UTF-8', 'auto');
             }, $array), ';');
         }
-
+    
         fclose($file);
         exit();
     }
-
-
+    
 
     public function exportAllAssocByRegions($export, $regionsRepository, $regionsId, $regionsName, $startingDate, $endingDate)
     {
