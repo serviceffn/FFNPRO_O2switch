@@ -25,7 +25,7 @@ class ExportService extends AbstractController
         $now = new \DateTime();
 
         // Mettre à jour l'en-tête pour inclure 'Type'
-        $header_ar = array('Licence;Nom;Prenom;Genre;Age;DateNaissance;Telephone;Email;Centre;Adresse;Complement;Zip;Ville;Pays;DemandeImpression;RGPD;Creation;Renouvellement;Type');
+        $header_ar = array('Licence;Nom;Prenom;Genre;Age;DateNaissance;Telephone;Email;Centre;Adresse;Complement;Zip;Ville;Pays;Carte;RGPD;Creation;Renouvellement;Type');
 
         $file = fopen($filename, "w");
 
