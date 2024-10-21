@@ -1506,4 +1506,7 @@ class UsersRepository extends ServiceEntityRepository
         return $resultSet->fetchOne();
     }
 
+
+    
+
 }
