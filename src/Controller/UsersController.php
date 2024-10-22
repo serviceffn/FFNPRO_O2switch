@@ -8,6 +8,7 @@ use App\Entity\UsersFromAllYears;
 use App\Repository\UsersFromAllYearsRepository;
 use App\Entity\Historique;
 use App\Entity\Facture;
+use App\Entity\Prix;
 use App\Form\ContactType;
 use App\Form\ExportType;
 use App\Form\SearchUsersType;
@@ -18,6 +19,7 @@ use App\Form\modifyUserType;
 use App\Form\SearchByAssociations;
 use App\Repository\AssociationsRepository;
 use App\Repository\UsersRepository;
+use App\Repository\PrixRepository;
 use App\Services\QrCodeService;
 use ContainerDsvu5Ut\PaginatorInterface_82dac15;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,6 +39,8 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use DateTimeImmutable;
 use Symfony\Component\Filesystem\Filesystem;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+
 
 
 
@@ -260,6 +264,7 @@ class UsersController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $usersRepository->showQrTrue($chaine);
 
+
         foreach ($user as $users) {
             $qrCode = $qrcodeService->qrcode($id = $users['id']);
             $imagePath = 'qr-code/' . $users['chaine'] . '.png';
@@ -284,7 +289,6 @@ class UsersController extends AbstractController
 
             $html = "<html><body><div style='width:90%;border-radius:20px;border:1px solid black;box-shadow: 5px 10px 18px #888888;padding:5%' ><img src='" . $base64Imagee . "' alt='Image' height='10%' style='float:right;' >" . $users['nom'] . " " . $users['prenom'] . "<div  width='100%'' style='margin-right:35%'>" . $users['n_licence'] . "<br>" . $users['nomm'] . "<br>" . $users['adresseassoc'] . "<br>" . $users['villeassoc'] . " " . $users['zipassoc'] . "<br>" . $users['emailassoc'] . "</p></div><div style='display: flex;flex-direction: row;align-items: top;justify-content: left;margin-top:10%'><img src='" . $base64Imageeee . "'  alt='Image 2' style='' width='18%' height='20%'><div class='text-container' style='width:35%;position:absolute'><p style='font-size: 10px;font-weight: bold;margin: 0 20px;'>26 rue Paul Belmondo<br>75012 Paris - 01.48.10.31.00<br>contact@ffn-naturisme.com</p><br><div style='border-bottom: 1px solid black;margin-top:3%'></div><br><p style='font-size: 10px;position:absolute;font-weight: bold;margin: 0 20px;'>Assurance MAIF 4274207 D<br></p></div><img src='" . $base64Imageee . "'  alt='Image 2' style='width:15%;width: 80px;height: 80px;margin: 0 20px;margin-left:45%'> <img src='" . $base64Image . "'  alt='Image 2' style='width: 80px;height: 80px;margin: 0 20px;'> </div></div></body></html>";
 
-            // Convertir le HTML en 
             $options = new Options();
             $options->setIsRemoteEnabled(true);
             $dompdf = new Dompdf($options);
@@ -364,12 +368,15 @@ class UsersController extends AbstractController
     /**
      * @Route("/licence/direct/{entry_id}", name="licence_direct_add", methods={"POST","GET"})
      */
-    public function licenceDirectAllId(UsersRepository $usersRepository, PaginatorInterface $paginator, Request $request, $entry_id, QrCodeService $qrcodeService, AssociationsRepository $associationsRepository, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function licenceDirectAllId(UsersRepository $usersRepository, PaginatorInterface $paginator, Request $request, $entry_id, QrCodeService $qrcodeService, AssociationsRepository $associationsRepository, PrixRepository $prixRepository, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $searchTerm = $entry_id;
         $resultt = $usersRepository->searchWordpresss($searchTerm);
+
+        $prixCentre = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Centre');
+        $prixAssociation = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Association');
 
         $user = new Users();
         $userFromAllYears = new UsersFromAllYears();
@@ -550,6 +557,8 @@ class UsersController extends AbstractController
                 return $this->render('users/onsuccess.html.twig', [
                     'user' => $user,
                     'age' => $difference,
+                    'prixCentre' => $prixCentre,
+                    'prixAssociation' => $prixAssociation,
                 ]);
             }
         }
@@ -607,11 +616,17 @@ class UsersController extends AbstractController
 
     /**
      * @Route("/html-to-image/{chaine}", name="html_to_image")
+     * @ParamConverter("user", options={"mapping": {"chaine": "chaine"}})
      */
     public function htmlToImage($chaine, UsersRepository $usersRepository, MailerInterface $mailer)
     {
-        // Récupérer les utilisateurs à partir de la base de données
         $user = $usersRepository->showQrTrue($chaine);
+        dump($user);
+
+
+        if (empty($user)) {
+            throw $this->createNotFoundException('Aucun utilisateur trouvé pour cette chaîne.');
+        }
 
         foreach ($user as $users) {
             $imagePath = 'qr-code/' . $users['chaine'] . '.png';
@@ -729,11 +744,14 @@ class UsersController extends AbstractController
     /**
      * @Route("/renouvellement/{id}", name="users_renouvellement", methods={"GET", "POST"})
      */
-    public function getRenouvellementLicence(UsersRepository $usersRepository, AssociationsRepository $associationsRepository, Request $request, Users $user, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService): Response
+    public function getRenouvellementLicence(UsersRepository $usersRepository, AssociationsRepository $associationsRepository,PrixRepository $prixRepository ,Request $request, Users $user, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService): Response
     {
 
         $usersFromAllYears = new UsersFromAllYears();
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $prixCentre = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Centre');
+        $prixAssociation = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Association');
 
         $form = $this->createForm(UsersType::class, $user);
         $form->handleRequest($request);
@@ -876,6 +894,8 @@ class UsersController extends AbstractController
                     'licence_sans_annee' => $licence,
                     'age' => $difference,
                     'lenghtKeyError' => $lenghtKeyError,
+                    'prixCentre' => $prixCentre,
+                    'prixAssociation' => $prixAssociation,
                     // 'form' => $formDematerialisation->createView(),
                 ]);
 
@@ -890,7 +910,9 @@ class UsersController extends AbstractController
                 'licence_new' => $licence_new,
                 'licence_sans_annee' => $licence,
                 'age' => $difference,
-                'lenghtKeyError' => $lenghtKeyError
+                'lenghtKeyError' => $lenghtKeyError,
+                'prixCentre' => $prixCentre,
+                'prixAssociation' => $prixAssociation,
             ]);
 
         } else {
@@ -905,9 +927,12 @@ class UsersController extends AbstractController
      * @Route("/new/{id}", name="users_new", methods={"GET", "POST"})
      */
 
-    public function new(Request $request, EntityManagerInterface $entityManager, UsersRepository $usersRepository, $id, MailerInterface $mailer, Associations $associations, QrCodeService $qrcodeService, AssociationsRepository $associationsRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UsersRepository $usersRepository, $id, MailerInterface $mailer, Associations $associations, QrCodeService $qrcodeService, AssociationsRepository $associationsRepository, PrixRepository $prixRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $prixCentre = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Centre');
+        $prixAssociation = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Association');
 
         $user = new Users();
         $userFromAllYears = new UsersFromAllYears();
@@ -1125,6 +1150,8 @@ class UsersController extends AbstractController
                 return $this->render('users/onsuccess.html.twig', [
                     'user' => $user,
                     'age' => $difference,
+                    'prixCentre' => $prixCentre,
+                    'prixAssociation' => $prixAssociation,
                 ]);
 
             }
@@ -1163,7 +1190,6 @@ class UsersController extends AbstractController
      */
     public function showQrCode(Users $user, QrcodeService $qrcodeService, $chaine, UsersRepository $usersRepository): Response
     {
-
         $date = date('Y');
         $qrCode = $qrcodeService->qrcode($chaine);
         $sql = $usersRepository->showQrCode($chaine);
@@ -1172,12 +1198,8 @@ class UsersController extends AbstractController
             'user' => $sql,
             'date' => $date,
             'qrcode' => $qrCode,
-            // 'photoCentre' => $sql
         ]);
-
     }
-
-
 
     /**
      * @Route("/renouvellement/{id}/choice", name="choice_renouvellement", methods={"GET"})
@@ -1373,7 +1395,7 @@ class UsersController extends AbstractController
     /**
      * @Route("/renouvellement/{id}/qrcode/", name="qrcode_only", methods={"POST","GET"})
      */
-    public function qrcodeOnly(UsersRepository $usersRepository, AssociationsRepository $associationsRepository, Request $request, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService, Users $user): Response
+    public function qrcodeOnly(UsersRepository $usersRepository, AssociationsRepository $associationsRepository, PrixRepository $prixRepository, Request $request, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService, Users $user): Response
     {
         // $update = $usersRepository->updateImpression($id);
 
@@ -1381,6 +1403,9 @@ class UsersController extends AbstractController
 
         $form = $this->createForm(UsersType::class, $user);
         $form->handleRequest($request);
+
+        $prixCentre = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Centre');
+        $prixAssociation = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Association');
 
         $formDematerialisation = $this->createForm(DematerialisationType::class, $user);
         $formDematerialisation->handleRequest($request);
@@ -1499,6 +1524,8 @@ class UsersController extends AbstractController
                         'licence_sans_annee' => $licence,
                         'age' => $difference,
                         'lenghtKeyError' => $lenghtKeyError,
+                        'prixCentre' => $prixCentre,
+                        'prixAssociation' => $prixAssociation,
                         // 'form' => $formDematerialisation->createView(),
                     ]);
                 }
@@ -1513,7 +1540,9 @@ class UsersController extends AbstractController
                 'licence_new' => $licence_new,
                 'licence_sans_annee' => $licence,
                 'age' => $difference,
-                'lenghtKeyError' => $lenghtKeyError
+                'lenghtKeyError' => $lenghtKeyError,
+                'prixCentre' => $prixCentre,
+                'prixAssociation' => $prixAssociation
             ]);
 
         } else {
