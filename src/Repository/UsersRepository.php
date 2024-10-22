@@ -87,6 +87,15 @@ class UsersRepository extends ServiceEntityRepository
         return $resultSet->fetchAll(); // fetch sur Result, pas sur Statement :eyes:
     }
 
+    public function findUserById($id): ?Users
+{
+    return $this->createQueryBuilder('u')
+        ->andWhere('u.id = :id')
+        ->setParameter('id', $id)
+        ->getQuery()
+        ->getOneOrNullResult();
+}
+
 
     public function findLicenceDirectAll()
     {

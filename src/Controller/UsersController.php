@@ -39,6 +39,8 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use DateTimeImmutable;
 use Symfony\Component\Filesystem\Filesystem;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+
 
 
 
@@ -262,6 +264,7 @@ class UsersController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $usersRepository->showQrTrue($chaine);
 
+
         foreach ($user as $users) {
             $qrCode = $qrcodeService->qrcode($id = $users['id']);
             $imagePath = 'qr-code/' . $users['chaine'] . '.png';
@@ -286,7 +289,6 @@ class UsersController extends AbstractController
 
             $html = "<html><body><div style='width:90%;border-radius:20px;border:1px solid black;box-shadow: 5px 10px 18px #888888;padding:5%' ><img src='" . $base64Imagee . "' alt='Image' height='10%' style='float:right;' >" . $users['nom'] . " " . $users['prenom'] . "<div  width='100%'' style='margin-right:35%'>" . $users['n_licence'] . "<br>" . $users['nomm'] . "<br>" . $users['adresseassoc'] . "<br>" . $users['villeassoc'] . " " . $users['zipassoc'] . "<br>" . $users['emailassoc'] . "</p></div><div style='display: flex;flex-direction: row;align-items: top;justify-content: left;margin-top:10%'><img src='" . $base64Imageeee . "'  alt='Image 2' style='' width='18%' height='20%'><div class='text-container' style='width:35%;position:absolute'><p style='font-size: 10px;font-weight: bold;margin: 0 20px;'>26 rue Paul Belmondo<br>75012 Paris - 01.48.10.31.00<br>contact@ffn-naturisme.com</p><br><div style='border-bottom: 1px solid black;margin-top:3%'></div><br><p style='font-size: 10px;position:absolute;font-weight: bold;margin: 0 20px;'>Assurance MAIF 4274207 D<br></p></div><img src='" . $base64Imageee . "'  alt='Image 2' style='width:15%;width: 80px;height: 80px;margin: 0 20px;margin-left:45%'> <img src='" . $base64Image . "'  alt='Image 2' style='width: 80px;height: 80px;margin: 0 20px;'> </div></div></body></html>";
 
-            // Convertir le HTML en 
             $options = new Options();
             $options->setIsRemoteEnabled(true);
             $dompdf = new Dompdf($options);
@@ -614,11 +616,17 @@ class UsersController extends AbstractController
 
     /**
      * @Route("/html-to-image/{chaine}", name="html_to_image")
+     * @ParamConverter("user", options={"mapping": {"chaine": "chaine"}})
      */
     public function htmlToImage($chaine, UsersRepository $usersRepository, MailerInterface $mailer)
     {
-        // Récupérer les utilisateurs à partir de la base de données
         $user = $usersRepository->showQrTrue($chaine);
+        dump($user);
+
+
+        if (empty($user)) {
+            throw $this->createNotFoundException('Aucun utilisateur trouvé pour cette chaîne.');
+        }
 
         foreach ($user as $users) {
             $imagePath = 'qr-code/' . $users['chaine'] . '.png';
@@ -1182,7 +1190,6 @@ class UsersController extends AbstractController
      */
     public function showQrCode(Users $user, QrcodeService $qrcodeService, $chaine, UsersRepository $usersRepository): Response
     {
-
         $date = date('Y');
         $qrCode = $qrcodeService->qrcode($chaine);
         $sql = $usersRepository->showQrCode($chaine);
@@ -1191,12 +1198,8 @@ class UsersController extends AbstractController
             'user' => $sql,
             'date' => $date,
             'qrcode' => $qrCode,
-            // 'photoCentre' => $sql
         ]);
-
     }
-
-
 
     /**
      * @Route("/renouvellement/{id}/choice", name="choice_renouvellement", methods={"GET"})

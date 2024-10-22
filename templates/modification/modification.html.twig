@@ -1,11 +1,9 @@
-{# templates/modification_prix.html.twig #}
-
 {% extends 'base.html.twig' %}
 
 {% block body %}
     <h1>Modifier les prix des licences</h1>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <table class="table">
             <thead>
                 <tr>
@@ -25,10 +23,44 @@
             </tbody>
         </table>
         
+        <div class="form-group">
+            <label for="imageUpload">Changer l'image (formats autorisés: jpg, jpeg, png, jfif, svg, gif):</label>
+            <input type="file" name="image" id="imageUpload" accept=".jpg, .jpeg, .png, .jfif, .svg, .gif">
+        </div>
+
+        <!-- Aperçu de l'image -->
+        <div class="form-group">
+            <label>Aperçu de l'image :</label>
+            <img id="imagePreview" src="" alt="Aperçu de l'image" style="display: none; max-width: 200px; max-height: 200px;"/>
+        </div>
+
         <button type="submit" class="btn btn-success">Valider</button>
     </form>
 
     {% for message in app.flashes('success') %}
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
+
+    <script>
+        // JavaScript pour afficher l'aperçu de l'image
+        document.getElementById('imageUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const imagePreview = document.getElementById('imagePreview');
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block'; // Affiche l'image
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = '';
+                imagePreview.style.display = 'none'; // Masque l'image si aucun fichier n'est sélectionné
+            }
+        });
+    </script>
 {% endblock %}
+

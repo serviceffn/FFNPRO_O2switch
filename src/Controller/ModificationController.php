@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Prix;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+
 
 class ModificationController extends AbstractController
 {
@@ -20,7 +22,6 @@ class ModificationController extends AbstractController
         $prix = $entityManager->getRepository(Prix::class)->findAll();
 
         if ($request->isMethod('POST')) {
-            // Traitement du formulaire pour chaque type de licence
             foreach ($prix as $p) {
                 $newPrice = $request->request->get('prix_' . $p->getId());
                 if ($newPrice !== null) {
@@ -28,65 +29,31 @@ class ModificationController extends AbstractController
                 }
             }
 
-            // Sauvegarde des modifications
+            // Gestion de l'upload de l'image
+            $imageFile = $request->files->get('image');
+            if ($imageFile) {
+                $uploadDirectory = $this->getParameter('images_directory');
+                $existingImagePath = $uploadDirectory . '/inf.gif';
+
+                try {
+                    if (file_exists($existingImagePath)) {
+                        unlink($existingImagePath);
+                    }
+
+                    $imageFile->move($uploadDirectory, 'inf.gif');
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors du téléchargement de l\'image.');
+                }
+            }
+
             $entityManager->flush();
 
-            // Message de succès
-            $this->addFlash('success', 'Les prix ont été mis à jour avec succès.');
+            $this->addFlash('success', 'Les modifications ont été appliqués avec succès.');
             return $this->redirectToRoute('modification');
         }
 
         return $this->render('modification/modification.html.twig', [
             'prix' => $prix,
         ]);
-    }
-
-
-    public function showPricesInscription(EntityManagerInterface $entityManager)
-    {
-        $prixCentre = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Centre');
-        $prixAssociation = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Association');
-    
-        $prix = $entityManager->getRepository(Prix::class)->findAll();
-
-        
-        dump($prixCentre, $prixAssociation);
-        
-        if (!$prixCentre) {
-            throw $this->createNotFoundException('Prix pour les centres non trouvé.');
-        }
-        if (!$prixAssociation) {
-            throw $this->createNotFoundException('Prix pour les associations non trouvé.');
-        }
-    
-        return $this->render('users/onsuccess.html.twig', [
-            'prixCentre' => $prixCentre,
-            'prixAssociation' => $prixAssociation,
-        ]);
-    }
-    
-    
-    public function showPricesRenouvellement(EntityManagerInterface $entityManager)
-    {
-        $prixCentre = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Centre');
-        $prixAssociation = $entityManager->getRepository(Prix::class)->findPriceByTypeLicence('Association');
-    
-        dump($prixCentre, $prixAssociation);
-
-        $prix = $entityManager->getRepository(Prix::class)->findAll();
-
-        
-        if (!$prixCentre) {
-            throw $this->createNotFoundException('Prix pour les centres non trouvé.');
-        }
-        if (!$prixAssociation) {
-            throw $this->createNotFoundException('Prix pour les associations non trouvé.');
-        }
-    
-        return $this->render('users/renouvellement.html.twig', [
-            'prixCentre' => $prixCentre,
-            'prixAssociation' => $prixAssociation,
-        ]);
-    }
-    
+    }  
 }
