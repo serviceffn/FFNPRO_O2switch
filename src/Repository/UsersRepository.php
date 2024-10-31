@@ -354,6 +354,7 @@ class UsersRepository extends ServiceEntityRepository
         ;
     }
     
+    
 
     // ANCIENNE FONCTION , IL FAUDRAIT RETROUVER LE MOYEN DE CURRENT DATE DANS LE DQL
     // public function sortByAssociation($id)
