@@ -26,6 +26,13 @@
         {% elseif age < 18 %}
             <p style='text-align:center'>La FFN vous a facturé : 0€ (Licence jeune -18)<br>Total TTC : <b>0€</b></p>
         {% endif %}
+        {% if age >= 18 and app.user.type == 'Region' %} 
+            <p style='text-align:center'>La FFN vous a facturé : {{ prixCentre.prix }}€ <br>Total TTC : <b>{{ prixCentre.prix }}€</b></p>
+        {% elseif app.user.type == 'Association' and age >= 18 %}
+            <p style='text-align:center'>La FFN vous a facturé : {{ prixAssociation.prix }}€ <br>Total TTC : <b>{{ prixAssociation.prix }}€</b></p>
+        {% elseif age < 18 %}
+            <p style='text-align:center'>La FFN vous a facturé : 0€ (Licence jeune -18)<br>Total TTC : <b>0€</b></p>
+        {% endif %}
     {% endif %}
 
     {% if app.user.id == 94 %}
