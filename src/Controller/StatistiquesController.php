@@ -126,7 +126,7 @@ class StatistiquesController extends AbstractController
                 $exportService->exportAllAssoc($form, $usersRepository, $associationsRepository, $associationId, $startingDate, $endingDate);
             }        
         }
-
+        // dump($users);
         return $this->render('statistiques/showAllAssoc.html.twig', [
             'users' => $users,
             'formDate' => $form->createView(),
