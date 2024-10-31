@@ -340,7 +340,7 @@ class UsersRepository extends ServiceEntityRepository
     public function countAll()
     {
         return $this->createQueryBuilder('a')
-            ->select('b.id,b.nom , count(a.id) as NB')
+            ->select('b.id, b.nom, b.adresse, b.zip, b.ville, count(a.id) as NB')
             ->leftJoin(
                 'App\Entity\Associations',
                 'b',
@@ -353,9 +353,7 @@ class UsersRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
-
-
-
+    
 
     // ANCIENNE FONCTION , IL FAUDRAIT RETROUVER LE MOYEN DE CURRENT DATE DANS LE DQL
     // public function sortByAssociation($id)

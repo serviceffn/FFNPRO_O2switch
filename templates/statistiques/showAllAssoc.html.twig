@@ -30,6 +30,7 @@
 		<thead>
 			<tr>
 				<th>Associations / Centre</th>
+				<th>Adresse</th>
 				<th>actions</th>
 			</tr>
 		</thead>
@@ -38,6 +39,7 @@
 				{% set associationId = user.id %}
 				<tr>
 					<td>{{ user.nom }}</td>
+					<td>{{ user.adresse }} {{ user.ville }} {{ user.zip }}</td>
 					<td>
 						<a href="{{ path('statistiques_associations_id', {'id': user.id}) }}">Voir Détails</a>
 					</td>
