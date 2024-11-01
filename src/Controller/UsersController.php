@@ -744,7 +744,7 @@ class UsersController extends AbstractController
     /**
      * @Route("/renouvellement/{id}", name="users_renouvellement", methods={"GET", "POST"})
      */
-    public function getRenouvellementLicence(UsersRepository $usersRepository, AssociationsRepository $associationsRepository,PrixRepository $prixRepository ,Request $request, Users $user, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService): Response
+    public function getRenouvellementLicence(UsersRepository $usersRepository, AssociationsRepository $associationsRepository, PrixRepository $prixRepository, Request $request, Users $user, EntityManagerInterface $entityManager, $id, MailerInterface $mailer, QrCodeService $qrcodeService): Response
     {
 
         $usersFromAllYears = new UsersFromAllYears();
@@ -941,6 +941,19 @@ class UsersController extends AbstractController
         // dump($form->getData());
 
         $now = new \DateTime();
+
+        $debutBlocage = new \DateTime($now->format('Y') . '-11-01');
+        $finBlocage = new \DateTime($now->format('Y') . '-12-31');
+
+        if ($now >= $debutBlocage && $now <= $finBlocage) {
+            $errorMessage = 'Les inscriptions sont bloquées entre le 01 novembre et le 31 décembre.';
+            return $this->render('users/new.html.twig', [
+                'user' => $user,
+                'form' => $form->createView(),
+                'errorMessage' => $errorMessage,
+            ]);
+        }
+
 
         $formContact = $this->createForm(ContactType::class);
         $formContact->handleRequest($request);
@@ -1320,24 +1333,24 @@ class UsersController extends AbstractController
     public function delete(Request $request, Users $user, EntityManagerInterface $entityManager, UsersFromAllYearsRepository $usersFromAllYearsRepositoryRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-    
+
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             $userId = $user->getId();
-    
+
             // Supprimer l'utilisateur de la table Users
             $entityManager->remove($user);
             $entityManager->flush();
-    
+
             $usersFromAllYears = $usersFromAllYearsRepositoryRepository->findBy(['user_id' => $userId]); // Trouver les entrées dans UsersFromAllYears avec user_id correspondant
             foreach ($usersFromAllYears as $userFromAllYears) {
                 $entityManager->remove($userFromAllYears);
             }
             $entityManager->flush();
         }
-    
+
         return $this->redirectToRoute('accueil', [], Response::HTTP_SEE_OTHER);
     }
-    
+
 
     // public function delete(Request $request, Users $user, EntityManagerInterface $entityManager): Response
     // {
@@ -1553,32 +1566,32 @@ class UsersController extends AbstractController
         }
     }
 
- /**
- * @Route("/user/update-imprimed/{id}", name="users_update_imprimed", methods={"GET"})
- */
-public function updateImprimed($id, Request $request)
-{
-    $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
+    /**
+     * @Route("/user/update-imprimed/{id}", name="users_update_imprimed", methods={"GET"})
+     */
+    public function updateImprimed($id, Request $request)
+    {
+        $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
 
-    if (!$user) {
-        throw $this->createNotFoundException('No user found for id '.$id);
+        if (!$user) {
+            throw $this->createNotFoundException('No user found for id ' . $id);
+        }
+
+        // Logique de conversion
+        if ($user->getImpression() == 0) {
+            $user->setImpression(1); // Convertir en carte
+            $user->setIsImprimed(false); // La carte n'a pas encore été imprimée
+        } else {
+            $user->setImpression(0); // Convertir en QR code
+            $user->setIsImprimed(true); // Supposons que le QR code soit "imprimé"
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($user);
+        $em->flush();
+
+        return $this->redirectToRoute('users_index'); // Rediriger vers la liste des utilisateurs
     }
-
-    // Logique de conversion
-    if ($user->getImpression() == 0) {
-        $user->setImpression(1); // Convertir en carte
-        $user->setIsImprimed(false); // La carte n'a pas encore été imprimée
-    } else {
-        $user->setImpression(0); // Convertir en QR code
-        $user->setIsImprimed(true); // Supposons que le QR code soit "imprimé"
-    }
-
-    $em = $this->getDoctrine()->getManager();
-    $em->persist($user);
-    $em->flush();
-
-    return $this->redirectToRoute('users_index'); // Rediriger vers la liste des utilisateurs
-}
 
 
 
