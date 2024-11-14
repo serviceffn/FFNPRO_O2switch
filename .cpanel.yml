@@ -1,5 +1,10 @@
 ---
 deployment:
   tasks:
-    - export APP_ENV=dev
+    - export DEPLOYPATH=/home/tida2685/repositories/ffnpro_o2switch/public
+
+    - export APP_ENV=prod
+
+    - cd $DEPLOYPATH
+
     - composer install
