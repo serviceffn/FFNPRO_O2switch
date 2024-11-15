@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/tida2685/repositories/ffnpro_o2switch/public
+    - export DEPLOYPATH=/home/tida2685/public_html/ffnprotest.net/public
 
     - export APP_ENV=prod
 
